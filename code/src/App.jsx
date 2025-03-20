@@ -5,6 +5,8 @@ import Header from './Header';
 import HomePage from './HomePage';
 import Forms from './Components/Forms';
 import Management from './Components/Managements';
+import Help from './Components/Help';
+import Info from './Components/Info';
 
 export default function App() {
   return (
@@ -15,6 +17,8 @@ export default function App() {
           <Route path="/" element={<HomePage />} />
           <Route path="/forms" element={<Forms />} />
           <Route path="/management" element={<Management />} />
+          <Route path="/help" element={<Help />} />
+          <Route path="/info" element={<Info />} />
         </Routes>
       </Container>
     </>

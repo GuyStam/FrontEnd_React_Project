@@ -15,6 +15,12 @@ export default function Header() {
         <Button color="inherit" component={RouterLink} to="/management">
           Management
         </Button>
+        <Button color="inherit" component={RouterLink} to="/help">
+          Help
+        </Button>
+        <Button color="inherit" component={RouterLink} to="/info">
+          Info
+          </Button>
       </Toolbar>
     </AppBar>
   );
