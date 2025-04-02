@@ -9,6 +9,9 @@ import Help from './Components/Help';
 import Info from './Components/Info';
 import Icons from './Components/Icons';
 
+import CoursesTable from './Components/CoursesTable';
+import CoursesForm from './Components/CoursesForm';
+
 export default function App() {
   return (
     <>
@@ -19,8 +22,11 @@ export default function App() {
           <Route path="/forms" element={<Forms />} />
           <Route path="/management" element={<Management />} />
           <Route path="/help" element={<Help />} />
-          <Route path="/info" element={<Info />} />
-          <Route path="/icons" element={<Icons />} />
+          <Route path="/info" element={<Info />} />
+          <Route path="/icons" element={<Icons />} />
+
+          <Route path="/courses" element={<CoursesTable />} />
+          <Route path="/add-course" element={<CoursesForm />} />
         </Routes>
       </Container>
     </>
