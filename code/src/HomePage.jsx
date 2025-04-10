@@ -1,16 +1,18 @@
+// HomePage.jsx – Improved with Stats, Timetable & Countdown
 import React, { useEffect, useState } from "react";
-import { Box, Typography } from "@mui/material";
+import {
+  Box,
+  Typography
+} from "@mui/material";
 import AssignmentIcon from "@mui/icons-material/Assignment";
 import SchoolIcon from "@mui/icons-material/School";
 import CalendarTodayIcon from "@mui/icons-material/CalendarToday";
-import MessageIcon from "@mui/icons-material/Message";
 import TimerIcon from "@mui/icons-material/Timer";
 import ScheduleIcon from "@mui/icons-material/Schedule";
+import MessageIcon from "@mui/icons-material/Message";
 import InfoBox from "./Components/InfoBox";
 import ScheduleTable from "./Components/ScheduleTable";
 
-
-// מחשב כמה ימים נשארו עד תאריך
 const getDaysUntil = (dateStr) => {
   const now = new Date();
   const target = new Date(dateStr);
@@ -49,7 +51,6 @@ export default function HomePage() {
 
   const daysLeft = getDaysUntil(semesterEndDate);
 
-  // מערכת שעות לדוגמה
   const sampleSchedule = [
     {
       day: "Sunday",
@@ -93,12 +94,12 @@ export default function HomePage() {
       </Typography>
 
       <Box sx={{ display: "flex", flexWrap: "wrap", gap: 3 }}>
-        <InfoBox icon={<AssignmentIcon />} title="Upcoming Assignments" content={nextAssignment ? `Next due: ${nextAssignment}` : ""} />
-        <InfoBox icon={<SchoolIcon />} title="Current GPA" content={average || ""} />
-        <InfoBox icon={<CalendarTodayIcon />} title="Upcoming Exams" content={nextAssignment ? `Exam on: ${nextAssignment}` : ""} />
-        <InfoBox icon={<TimerIcon />} title="Time Until Semester Ends" content={daysLeft || ""} />
-        <InfoBox icon={<ScheduleIcon />} title="Weekly Timetable" content="" />
-        <InfoBox icon={<MessageIcon />} title="Lecturer Message" content={lecturerMessage} />
+        <InfoBox icon={<AssignmentIcon />} title="Upcoming Assignments" content={nextAssignment ? `Next due: ${nextAssignment}` : "No upcoming assignments"} />
+        <InfoBox icon={<SchoolIcon />} title="Current GPA" content={average || "N/A"} />
+        <InfoBox icon={<CalendarTodayIcon />} title="Upcoming Exams" content={nextAssignment ? `Exam on: ${nextAssignment}` : "No exams scheduled"} />
+        <InfoBox icon={<TimerIcon />} title="Time Until Semester Ends" content={daysLeft} />
+        <InfoBox icon={<ScheduleIcon />} title="Weekly Timetable" content="Displayed below" />
+        <InfoBox icon={<MessageIcon />} title="Lecturer Message" content={lecturerMessage || "No message available"} />
       </Box>
 
       <ScheduleTable schedule={sampleSchedule} />

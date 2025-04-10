@@ -101,15 +101,14 @@ export default function Header() {
 
         {/* הלוגו מימין */}
         <Box>
-          <img
-            src={OnoAcademic}
-            alt="Ono Logo"
-            style={{
-              maxHeight: "50px"
-              // אפשר לשנות גודל, להוסיף שוליים וכו'
-            }}
-          />
-        </Box>
+  <RouterLink to="/">
+    <img
+      src={OnoAcademic}
+      alt="Ono Logo"
+      style={{ maxHeight: "50px", cursor: "pointer" }}
+    />
+  </RouterLink>
+  </Box>
       </Toolbar>
     </AppBar>
   );
