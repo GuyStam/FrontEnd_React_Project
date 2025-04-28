@@ -1,21 +1,37 @@
-// InfoBox.jsx – A reusable summary card component
-import React from "react";
-import { Card, CardContent, Typography, Box } from "@mui/material";
+import React, { useState, useEffect } from "react";
+import { Box } from "@mui/material";
+import InfoBox from "../Components/InfoBox"; // תוודא שהנתיב נכון אצלך
+import AssignmentIcon from "@mui/icons-material/Assignment";
 
-export default function InfoBox({ icon, title, content }) {
+export default function Info() {
+  const [info, setInfo] = useState(null);
+
+  useEffect(() => {
+    const saved = JSON.parse(localStorage.getItem("studentInfo"));
+    if (saved) setInfo(saved);
+  }, []);
+
+  const buildContent = () => {
+    if (!info) return null;
+
+    return (
+      <span>
+        <strong>Name:</strong> {info.fullName || "-"}<br />
+        <strong>Email:</strong> {info.email || "-"}<br />
+        <strong>Address:</strong> {info.address || "-"}<br />
+        <strong>Phone:</strong> {info.phone || "-"}<br />
+        <strong>ID Number:</strong> {info.idNumber || "-"}
+      </span>
+    );
+  };
+
   return (
-    <Card sx={{ width: 260, minHeight: 140, display: "flex", flexDirection: "column", justifyContent: "center", backgroundColor: "#f9f9f9" }}>
-      <CardContent>
-        <Box sx={{ display: "flex", alignItems: "center", mb: 1 }}>
-          <Box sx={{ mr: 1 }}>{icon}</Box>
-          <Typography variant="h6" sx={{ fontWeight: "bold" }}>
-            {title}
-          </Typography>
-        </Box>
-        <Typography variant="body2" sx={{ color: "#555" }}>
-          {content || "No data available"}
-        </Typography>
-      </CardContent>
-    </Card>
+    <Box sx={{ mt: 4, display: "flex", justifyContent: "center" }}>
+      <InfoBox
+        icon={<AssignmentIcon sx={{ fontSize: 40, color: "#7FC243" }} />}
+        title="Student Information"
+        content={buildContent()}
+      />
+    </Box>
   );
 }

@@ -1,0 +1,103 @@
+/* app.css */
+
+/* עיצוב כללי */
+body {
+  font-family: 'Assistant', sans-serif;
+  background-color: #fafafa;
+  margin: 0;
+  padding: 0;
+}
+
+/* עיצוב כותרות */
+h1, h2, h3, h4, h5 {
+  font-family: 'Assistant', sans-serif;
+  font-weight: bold;
+  color: #000;
+  text-align: center;
+}
+
+/* עיצוב טבלאות */
+table {
+  width: 100%;
+  border-collapse: collapse;
+}
+
+table, th, td {
+  border: 1px solid #7FC243;
+}
+
+th, td {
+  padding: 10px;
+  text-align: left;
+}
+
+th {
+  background-color: #eafaf1;
+  font-weight: bold;
+}
+
+tr {
+  background-color: white;
+}
+
+/* עיצוב כפתורים */
+button, .MuiButton-root {
+  background-color: #7FC243;
+  color: white;
+  font-weight: bold;
+  text-transform: none;
+}
+
+button:hover, .MuiButton-root:hover {
+  background-color: #6DAF34;
+}
+
+/* עיצוב טפסים */
+.MuiTextField-root {
+  margin-bottom: 16px;
+}
+
+.MuiInputBase-root {
+  border-radius: 5px;
+}
+
+/* עיצוב Snackbar */
+.MuiSnackbar-root {
+  background-color: #7FC243;
+  color: white;
+}
+
+/* עיצוב טבלה עם גבולות */
+.MuiTableCell-root {
+  border: 1px solid #7FC243;
+  padding: 10px;
+}
+
+.MuiTableSortLabel-root {
+  font-weight: bold;
+}
+
+/* צבעים */
+.text-green {
+  color: #7FC243;
+}
+
+/* עיצוב כללי לטבלאות */
+.table-container {
+  border: 1px solid #7FC243;
+  border-radius: 8px;
+  background-color: white;
+}
+
+.table-header {
+  background-color: #eafaf1;
+}
+
+.table-cell {
+  border: 1px solid #7FC243;
+}
+
+/* מרווחים כלליים */
+.margin-top {
+  margin-top: 16px;
+}

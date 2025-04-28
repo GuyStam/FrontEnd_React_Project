@@ -1,121 +1,153 @@
-// Help.jsx – Help & User Guide with clear cards and links
-import React from "react";
+import React, { useState, useEffect } from "react";
 import {
   Box,
   Typography,
-  Card,
-  CardContent,
-  CardActions,
-  Button,
-  Grid,
-  Stack,
   TextField,
+  Button,
   Snackbar,
   Alert,
-  Divider
+  Stack,
+  Divider,
 } from "@mui/material";
-import { useNavigate } from "react-router-dom";
+
+const ADMIN_EMAIL = "guyroeiono1@gmail.com";
 
 export default function Help() {
-  const navigate = useNavigate();
-  const [message, setMessage] = React.useState("");
-  const [open, setOpen] = React.useState(false);
+  const [message, setMessage] = useState("");
+  const [open, setOpen] = useState(false);
+  const [studentInfo, setStudentInfo] = useState({
+    fullName: "",
+    email: "",
+    phone: "",
+  });
+
+  useEffect(() => {
+    const savedInfo = JSON.parse(localStorage.getItem("studentInfo"));
+    if (savedInfo) {
+      setStudentInfo({
+        fullName: savedInfo.fullName,
+        email: savedInfo.email,
+        phone: savedInfo.phone,
+      });
+    }
+  }, []);
 
   const handleSend = () => {
-    if (message.trim()) {
-      setOpen(true);
-      setMessage("");
+    const trimmedMessage = message.trim();
+    if (!trimmedMessage) {
+      alert("Please enter a message.");
+      return;
     }
+
+    const subject = encodeURIComponent("Support Request");
+    const body = encodeURIComponent(
+      `From: ${studentInfo.fullName}\nEmail: ${studentInfo.email}\nPhone: ${studentInfo.phone}\n\nMessage:\n${trimmedMessage}`
+    );
+    const gmailUrl = `https://mail.google.com/mail/?view=cm&fs=1&to=${ADMIN_EMAIL}&su=${subject}&body=${body}`;
+
+    window.open(gmailUrl, "_blank");
+
+    setMessage("");
+    setOpen(true);
   };
 
   return (
-    <Box>
-      <Typography variant="h4" gutterBottom>
+    <Box sx={{ padding: 3, maxWidth: "900px", margin: "0 auto" }}>
+      {/* כותרת במרכז הדף עם צבע שחור */}
+      <Typography
+        variant="h4"
+        sx={{
+          fontFamily: "Assistant",
+          textAlign: "center",
+          fontWeight: "bold",
+          mb: 3,
+          color: "#000", // צבע שחור
+        }}
+      >
         Help & User Guide
       </Typography>
 
       <Typography variant="body1" sx={{ mb: 3 }}>
-        This page provides a clear overview of how to use the system step-by-step, from navigation to managing your data. Use the cards below to access detailed instructions.
+        Welcome to the help page! Here you will find guidance on how to use
+        the system. You can also contact us through the form below if you need
+        assistance.
       </Typography>
 
-      <Grid container spacing={3}>
-        <Grid item xs={12} md={6}>
-          <Card variant="outlined">
-            <CardContent>
-              <Typography variant="h6">🏠 Home Page</Typography>
-              <Typography>
-                Start from the home page to get a general view of the system. From here, you can navigate to any section.
-              </Typography>
-            </CardContent>
-            <CardActions>
-              <Button size="small" onClick={() => navigate("/")}>Go to Home</Button>
-            </CardActions>
-          </Card>
-        </Grid>
+      {/* הסבר על כל עמוד */}
+      <Divider sx={{ my: 3 }} />
+      <Typography variant="h6" sx={{ mb: 1, color: "#7FC243" }}>
+        🏠 **Home Page**
+      </Typography>
+      <Typography sx={{ mb: 3 }}>
+        The Home Page is your dashboard. It displays an overview of your
+        assignments, GPA, upcoming exams, and more. Stay on top of your studies!
+      </Typography>
 
-        <Grid item xs={12} md={6}>
-          <Card variant="outlined">
-            <CardContent>
-              <Typography variant="h6">📋 Forms Area</Typography>
-              <Typography>
-                In the Forms area, you can view course data in read-only mode. You can filter and sort data using the toolbar.
-              </Typography>
-            </CardContent>
-            <CardActions>
-              <Button size="small" onClick={() => navigate("/forms")}>Go to Forms</Button>
-            </CardActions>
-          </Card>
-        </Grid>
+      <Divider sx={{ my: 3 }} />
+      <Typography variant="h6" sx={{ mb: 1, color: "#7FC243" }}>
+        📋 **Forms**
+      </Typography>
+      <Typography sx={{ mb: 3 }}>
+        The Forms section allows you to view and submit any required forms for
+        your courses. You can track deadlines and upload your assignments here.
+      </Typography>
 
-        <Grid item xs={12} md={6}>
-          <Card variant="outlined">
-            <CardContent>
-              <Typography variant="h6">🛠 Management Area</Typography>
-              <Typography>
-                Administrators can manage course data: add, edit, delete, upload and download courses in JSON format.
-              </Typography>
-            </CardContent>
-            <CardActions>
-              <Button size="small" onClick={() => navigate("/management")}>Go to Management</Button>
-            </CardActions>
-          </Card>
-        </Grid>
+      <Divider sx={{ my: 3 }} />
+      <Typography variant="h6" sx={{ mb: 1, color: "#7FC243" }}>
+        🛠️ **Management**
+      </Typography>
+      <Typography sx={{ mb: 3 }}>
+        The Management area is for administrators to manage courses, assignments, and other data. It's where you can add or modify course details.
+      </Typography>
 
-        <Grid item xs={12} md={6}>
-          <Card variant="outlined">
-            <CardContent>
-              <Typography variant="h6">💾 Saving & Loading Data</Typography>
-              <Typography>
-                Use the "Upload" and "Download" buttons in the Management area to save a backup or restore previous course data from a file.
-              </Typography>
-            </CardContent>
-            <CardActions>
-              <Button size="small" onClick={() => navigate("/management/courses")}>Manage Courses</Button>
-            </CardActions>
-          </Card>
-        </Grid>
-      </Grid>
+      <Divider sx={{ my: 3 }} />
+      <Typography variant="h6" sx={{ mb: 1, color: "#7FC243" }}>
+        📝 **Info**
+      </Typography>
+      <Typography sx={{ mb: 3 }}>
+        The Info section contains your personal details. You can update your contact information such as your name, email, and phone number here.
+      </Typography>
 
-      <Divider sx={{ my: 4 }} />
-
-      <Typography variant="h6" gutterBottom>
-        📩 Need Help? Send us a message:
+      {/* צור קשר */}
+      <Divider sx={{ my: 3 }} />
+      <Typography variant="h6" sx={{ mb: 2, color: "#7FC243" }}>
+        📩 **Need Help? Send us a message**
       </Typography>
 
       <Stack spacing={2} direction="row" sx={{ mb: 2 }}>
         <TextField
           label="Your message"
           fullWidth
+          multiline
+          minRows={3}
           value={message}
           onChange={(e) => setMessage(e.target.value)}
+          sx={{
+            backgroundColor: "#F1F8E9",
+            borderRadius: 2,
+            padding: 2,
+            color: "#333",
+          }}
         />
-        <Button variant="contained" sx={{ backgroundColor: "#7FC242" }} onClick={handleSend}>
+        <Button
+          variant="contained"
+          size="small"
+          sx={{
+            backgroundColor: "#7FC242",
+            fontFamily: "Assistant",
+            fontWeight: "bold",
+            textTransform: "none",
+          }}
+          onClick={handleSend}
+        >
           Send
         </Button>
       </Stack>
 
       <Snackbar open={open} autoHideDuration={3000} onClose={() => setOpen(false)}>
-        <Alert severity="success" sx={{ width: "100%" }}>Message sent successfully!</Alert>
+        <Alert severity="success" sx={{ width: "100%" }}>
+          Gmail compose opened. Ready to send to Admin.
+        </Alert>
       </Snackbar>
     </Box>
   );

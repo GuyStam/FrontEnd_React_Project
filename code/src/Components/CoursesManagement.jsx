@@ -11,130 +11,184 @@ import {
   TableCell,
   TableContainer,
   TableHead,
-  TableRow
+  TableRow,
+  Typography,
 } from "@mui/material";
+import "../App.css";
 
 export default function CoursesManagement() {
   const [courses, setCourses] = useState([]);
   const [newCourse, setNewCourse] = useState({
     courseName: "",
     lecturer: "",
-    year: "",
+    year: 2025,
     semester: "",
-    nextClass: "",
-    nextAssignment: ""
+    nextClass: new Date().toISOString().slice(0, 16),
+    nextAssignment: new Date().toISOString().slice(0, 16),
+    grades: { finalAverage: "" },
   });
   const [editIndex, setEditIndex] = useState(null);
   const [success, setSuccess] = useState("");
 
+  // Load courses and ensure each has a grades.finalAverage
   useEffect(() => {
-    const stored = localStorage.getItem("courses");
-    if (stored) setCourses(JSON.parse(stored));
+    const stored = JSON.parse(localStorage.getItem("courses") || "[]");
+    const normalized = stored.map((c) => ({
+      ...c,
+      grades: { finalAverage: c.grades?.finalAverage ?? "" },
+    }));
+    setCourses(normalized);
   }, []);
+
+  const save = (updated) => {
+    localStorage.setItem("courses", JSON.stringify(updated));
+    setCourses(updated);
+  };
 
   const handleChange = (e) => {
     const { name, value } = e.target;
-    setNewCourse((prev) => ({ ...prev, [name]: value }));
-  };
-
-  const saveToStorage = (updated) => {
-    localStorage.setItem("courses", JSON.stringify(updated));
-    setCourses(updated);
+    if (name === "finalAverage") {
+      setNewCourse((prev) => ({
+        ...prev,
+        grades: { finalAverage: value },
+      }));
+    } else {
+      setNewCourse((prev) => ({
+        ...prev,
+        [name]: value,
+      }));
+    }
   };
 
   const handleSubmit = () => {
     const updated = [...courses];
     if (editIndex !== null) {
       updated[editIndex] = newCourse;
-      setEditIndex(null);
-      setSuccess("Course updated successfully");
+      setSuccess("Course updated");
     } else {
       updated.push(newCourse);
-      setSuccess("Course added successfully");
+      setSuccess("Course added");
     }
-    saveToStorage(updated);
+    save(updated);
+    setEditIndex(null);
     setNewCourse({
       courseName: "",
       lecturer: "",
-      year: "",
+      year: 2025,
       semester: "",
-      nextClass: "",
-      nextAssignment: ""
+      nextClass: new Date().toISOString().slice(0, 16),
+      nextAssignment: new Date().toISOString().slice(0, 16),
+      grades: { finalAverage: "" },
     });
   };
 
-  const handleEdit = (index) => {
-    setNewCourse(courses[index]);
-    setEditIndex(index);
+  const handleEdit = (idx) => {
+    setNewCourse({ ...courses[idx] });
+    setEditIndex(idx);
   };
 
-  const handleDelete = (index) => {
-    const updated = [...courses];
-    updated.splice(index, 1);
-    saveToStorage(updated);
-    setSuccess("Course removed successfully");
-  };
-
-  const handleDownload = () => {
-    const blob = new Blob([JSON.stringify(courses, null, 2)], { type: "application/json" });
-    const link = document.createElement("a");
-    link.href = URL.createObjectURL(blob);
-    link.download = "courses.json";
-    link.click();
-  };
-
-  const handleUpload = (e) => {
-    const file = e.target.files[0];
-    if (!file) return;
-    const reader = new FileReader();
-    reader.onload = (event) => {
-      const data = JSON.parse(event.target.result);
-      saveToStorage(data);
-      setSuccess("Courses uploaded successfully");
-    };
-    reader.readAsText(file);
+  const handleDelete = (idx) => {
+    const updated = courses.filter((_, i) => i !== idx);
+    save(updated);
+    setSuccess("Course removed");
+    if (editIndex === idx) {
+      setEditIndex(null);
+      setNewCourse({
+        courseName: "",
+        lecturer: "",
+        year: 2025,
+        semester: "",
+        nextClass: new Date().toISOString().slice(0, 16),
+        nextAssignment: new Date().toISOString().slice(0, 16),
+        grades: { finalAverage: "" },
+      });
+    }
   };
 
   return (
     <div>
-      <h1>Courses Management</h1>
+      <Typography
+        variant="h4"
+        sx={{
+          textAlign: "center",
+          color: "#000", // צבע שחור
+          fontFamily: "Assistant",
+          fontWeight: "bold",
+          mb: 3,
+        }}
+      >
+        Courses Management
+      </Typography>
 
-      <div style={{ display: "flex", flexWrap: "wrap", gap: "1rem", marginBottom: "1rem" }}>
-        <TextField name="courseName" label="Course Name" value={newCourse.courseName} onChange={handleChange} />
-        <TextField name="lecturer" label="Lecturer" value={newCourse.lecturer} onChange={handleChange} />
-        <TextField name="year" label="Year" type="number" value={newCourse.year} onChange={handleChange} />
-        <TextField select name="semester" label="Semester" value={newCourse.semester} onChange={handleChange}>
+      <div style={{ display: "flex", flexWrap: "wrap", gap: "1rem", marginBottom: 16 }}>
+        <TextField
+          label="Course Name"
+          name="courseName"
+          value={newCourse.courseName}
+          onChange={handleChange}
+        />
+        <TextField
+          label="Lecturer"
+          name="lecturer"
+          value={newCourse.lecturer}
+          onChange={handleChange}
+        />
+        <TextField
+          label="Year"
+          name="year"
+          type="number"
+          value={newCourse.year}
+          onChange={handleChange}
+        />
+        <TextField select label="Semester" name="semester" value={newCourse.semester} onChange={handleChange}>
           <MenuItem value="A">A</MenuItem>
           <MenuItem value="B">B</MenuItem>
           <MenuItem value="Summer">Summer</MenuItem>
         </TextField>
-        <TextField name="nextClass" label="Next Class" type="date" InputLabelProps={{ shrink: true }} value={newCourse.nextClass} onChange={handleChange} />
-        <TextField name="nextAssignment" label="Next Assignment" type="date" InputLabelProps={{ shrink: true }} value={newCourse.nextAssignment} onChange={handleChange} />
+        <TextField
+          label="Next Class"
+          name="nextClass"
+          type="datetime-local"
+          InputLabelProps={{ shrink: true }}
+          value={newCourse.nextClass}
+          onChange={handleChange}
+        />
+        <TextField
+          label="Next Assignment"
+          name="nextAssignment"
+          type="datetime-local"
+          InputLabelProps={{ shrink: true }}
+          value={newCourse.nextAssignment}
+          onChange={handleChange}
+        />
+        <TextField
+          label="Final Average"
+          name="finalAverage"
+          type="number"
+          value={newCourse.grades.finalAverage}
+          onChange={handleChange}
+        />
       </div>
 
-      <Button variant="contained" onClick={handleSubmit} sx={{ backgroundColor: "#7FC242", mr: 2 }}>
-        {editIndex !== null ? "Update Course" : "Add Course"}
+      <Button
+        variant="contained"
+        onClick={handleSubmit}
+        sx={{ backgroundColor: "#7FC243", mb: 2 }}
+      >
+        {editIndex !== null ? "Update" : "Add"}
       </Button>
 
-      <Button variant="outlined" component="label" sx={{ mr: 2 }}>
-        Upload JSON
-        <input type="file" accept=".json" hidden onChange={handleUpload} />
-      </Button>
-
-      <Button variant="outlined" onClick={handleDownload}>
-        Download JSON
-      </Button>
-
-      <TableContainer component={Paper} sx={{ mt: 4 }}>
-        <Table>
-          <TableHead>
-            <TableRow sx={{ backgroundColor: "#eee" }}>
+      <TableContainer component={Paper}>
+        <Table size="small">
+          <TableHead sx={{ backgroundColor: "#eee" }}>
+            <TableRow>
               <TableCell>Course Name</TableCell>
               <TableCell>Lecturer</TableCell>
               <TableCell>Year</TableCell>
               <TableCell>Semester</TableCell>
               <TableCell>Next Class</TableCell>
               <TableCell>Next Assignment</TableCell>
+              <TableCell>Final Avg</TableCell>
               <TableCell>Actions</TableCell>
             </TableRow>
           </TableHead>
@@ -145,13 +199,14 @@ export default function CoursesManagement() {
                 <TableCell>{c.lecturer}</TableCell>
                 <TableCell>{c.year}</TableCell>
                 <TableCell>{c.semester}</TableCell>
-                <TableCell>{c.nextClass}</TableCell>
-                <TableCell>{c.nextAssignment}</TableCell>
+                <TableCell>{new Date(c.nextClass).toLocaleString("en-GB")}</TableCell>
+                <TableCell>{new Date(c.nextAssignment).toLocaleString("en-GB")}</TableCell>
+                <TableCell>{c.grades.finalAverage}</TableCell>
                 <TableCell>
-                  <Button size="small" variant="outlined" onClick={() => handleEdit(idx)} sx={{ mr: 1 }}>
+                  <Button size="small" onClick={() => handleEdit(idx)} sx={{ mr: 1 }}>
                     Edit
                   </Button>
-                  <Button size="small" variant="outlined" color="error" onClick={() => handleDelete(idx)}>
+                  <Button size="small" color="error" onClick={() => handleDelete(idx)}>
                     Delete
                   </Button>
                 </TableCell>
@@ -162,7 +217,7 @@ export default function CoursesManagement() {
       </TableContainer>
 
       <Snackbar open={!!success} autoHideDuration={3000} onClose={() => setSuccess("")}>
-        <Alert severity="success" sx={{ width: "100%" }}>{success}</Alert>
+        <Alert severity="success">{success}</Alert>
       </Snackbar>
     </div>
   );

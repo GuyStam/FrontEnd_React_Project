@@ -1,3 +1,4 @@
+// CoursesTable.jsx
 import React, { useState } from "react";
 import {
   Table,
@@ -12,6 +13,7 @@ import {
   TableSortLabel,
   Typography
 } from "@mui/material";
+import './App.css';
 
 export default function CoursesTable({ courses, onRemove, onEdit }) {
   const [searchTerm, setSearchTerm] = useState("");
@@ -28,7 +30,6 @@ export default function CoursesTable({ courses, onRemove, onEdit }) {
     course.courseName.toLowerCase().includes(searchTerm.toLowerCase()) ||
     course.lecturer.toLowerCase().includes(searchTerm.toLowerCase()) ||
     course.year.toString().includes(searchTerm)
-
   );
 
   const sortedCourses = [...filteredCourses].sort((a, b) => {
@@ -36,6 +37,16 @@ export default function CoursesTable({ courses, onRemove, onEdit }) {
     if (a[orderBy] > b[orderBy]) return orderDirection === "asc" ? 1 : -1;
     return 0;
   });
+
+  const columns = [
+    { id: "courseName", label: "Course Name" },
+    { id: "lecturer", label: "Lecturer" },
+    { id: "year", label: "Year" },
+    { id: "semester", label: "Semester" },
+    { id: "nextClass", label: "Next Class" },
+    { id: "nextAssignment", label: "Next Assignment" },
+    { id: "finalAverage", label: "Final Average" }
+  ];
 
   return (
     <div>
@@ -57,22 +68,15 @@ export default function CoursesTable({ courses, onRemove, onEdit }) {
         <TableContainer component={Paper}>
           <Table>
             <TableHead>
-              <TableRow style={{ backgroundColor: "#eee" }}>
-                {[
-                  { id: "courseName", label: "Course Name" },
-                  { id: "lecturer", label: "Lecturer" },
-                  { id: "year", label: "Year" },
-                  { id: "semester", label: "Semester" },
-                  { id: "nextClass", label: "Next Class" },
-                  { id: "nextAssignment", label: "Next Assignment" }
-                ].map((column) => (
-                  <TableCell key={column.id}>
+              <TableRow sx={{ backgroundColor: "#eee" }}>
+                {columns.map((col) => (
+                  <TableCell key={col.id}>
                     <TableSortLabel
-                      active={orderBy === column.id}
-                      direction={orderBy === column.id ? orderDirection : "asc"}
-                      onClick={() => handleSort(column.id)}
+                      active={orderBy === col.id}
+                      direction={orderBy === col.id ? orderDirection : "asc"}
+                      onClick={() => handleSort(col.id)}
                     >
-                      {column.label}
+                      {col.label}
                     </TableSortLabel>
                   </TableCell>
                 ))}
@@ -86,13 +90,27 @@ export default function CoursesTable({ courses, onRemove, onEdit }) {
                   <TableCell>{course.lecturer}</TableCell>
                   <TableCell>{course.year}</TableCell>
                   <TableCell>{course.semester}</TableCell>
-                  <TableCell>{course.nextClass}</TableCell>
-                  <TableCell>{course.nextAssignment}</TableCell>
+                  <TableCell>
+                    {course.nextClass
+                      ? new Date(course.nextClass).toLocaleString("en-GB", { hour12: false })
+                      : ""}
+                  </TableCell>
+                  <TableCell>
+                    {course.nextAssignment
+                      ? new Date(course.nextAssignment).toLocaleString("en-GB", { hour12: false })
+                      : ""}
+                  </TableCell>
+                  <TableCell>
+                    {course.grades?.finalAverage !== ""
+                      ? course.grades.finalAverage
+                      : "N/A"}
+                  </TableCell>
                   <TableCell>
                     <Button
                       variant="outlined"
                       color="primary"
-                      onClick={() => onEdit(courses.indexOf(course))}
+                      size="small"
+                      onClick={() => onEdit(idx)}
                       sx={{ mr: 1 }}
                     >
                       Edit
@@ -100,7 +118,8 @@ export default function CoursesTable({ courses, onRemove, onEdit }) {
                     <Button
                       variant="outlined"
                       color="error"
-                      onClick={() => onRemove(courses.indexOf(course))}
+                      size="small"
+                      onClick={() => onRemove(idx)}
                     >
                       Remove
                     </Button>

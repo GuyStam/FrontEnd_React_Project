@@ -1,17 +1,7 @@
-// HomePage.jsx – Improved with Stats, Timetable & Countdown
 import React, { useEffect, useState } from "react";
-import {
-  Box,
-  Typography
-} from "@mui/material";
-import AssignmentIcon from "@mui/icons-material/Assignment";
-import SchoolIcon from "@mui/icons-material/School";
-import CalendarTodayIcon from "@mui/icons-material/CalendarToday";
-import TimerIcon from "@mui/icons-material/Timer";
-import ScheduleIcon from "@mui/icons-material/Schedule";
-import MessageIcon from "@mui/icons-material/Message";
-import InfoBox from "./Components/InfoBox";
-import ScheduleTable from "./Components/ScheduleTable";
+import { Box, Typography, Grid } from "@mui/material";
+import HomeCards from "./Components/HomeCards"; // ייבוא של HomeCards
+import ScheduleTable from "./Components/ScheduleTable"; // ייבוא של מערכת השעות השבועית
 
 const getDaysUntil = (dateStr) => {
   const now = new Date();
@@ -20,88 +10,82 @@ const getDaysUntil = (dateStr) => {
   return diff > 0 ? `${diff} days left` : "Semester ended";
 };
 
-const semesterEndDate = "2025-06-30";
+const SEMESTER_START = "2025-02-01";
+const SEMESTER_END = "2025-06-30";
 
 export default function HomePage() {
   const [courses, setCourses] = useState([]);
-  const [average, setAverage] = useState(null);
   const [lecturerMessage, setLecturerMessage] = useState("");
 
   useEffect(() => {
-    const storedCourses = localStorage.getItem("courses");
-    if (storedCourses) {
-      setCourses(JSON.parse(storedCourses));
-    }
+    // load courses + grades from localStorage
+    const stored = localStorage.getItem("courses");
+    if (stored) setCourses(JSON.parse(stored));
 
-    const storedAverage = localStorage.getItem("averageGrade");
-    if (storedAverage) {
-      setAverage(storedAverage);
-    }
-
-    const storedMessage = localStorage.getItem("lecturerMessage");
-    if (storedMessage) {
-      setLecturerMessage(storedMessage);
-    }
+    // load lecturer message
+    const msg = localStorage.getItem("lecturerMessage");
+    if (msg) setLecturerMessage(msg);
   }, []);
 
+  // compute Current GPA
+  const gradeValues = courses
+    .map(c => Number(c.grades?.finalAverage))
+    .filter(v => !isNaN(v));
+  const averageGPA =
+    gradeValues.length > 0
+      ? (gradeValues.reduce((a, b) => a + b, 0) / gradeValues.length).toFixed(2)
+      : "N/A";
+
+  // next assignment due
   const nextAssignment = courses
-    .map((c) => c.nextAssignment)
+    .map(c => c.nextAssignment)
     .filter(Boolean)
     .sort()[0];
 
-  const daysLeft = getDaysUntil(semesterEndDate);
+  // days since start / until end
+  const now = new Date();
+  const sinceStart = Math.floor((now - new Date(SEMESTER_START)) / (1000 * 60 * 60 * 24));
+  const untilEnd = getDaysUntil(SEMESTER_END);
 
+  // מערך דוגמה למערכת השעות השבועית
   const sampleSchedule = [
-    {
-      day: "Sunday",
-      time: "10:00 - 12:00",
-      courseName: "Math for Business",
-      lecturer: "Dr. Cohen",
-      classNumber: "101",
-      lessonNumber: "1",
-    },
-    {
-      day: "Monday",
-      time: "14:00 - 16:00",
-      courseName: "Information Systems",
-      lecturer: "Ms. Levi",
-      classNumber: "202",
-      lessonNumber: "2",
-    },
-    {
-      day: "Wednesday",
-      time: "12:00 - 14:00",
-      courseName: "React Basics",
-      lecturer: "Mr. Azulay",
-      classNumber: "303",
-      lessonNumber: "3",
-    },
+    { day: "Sunday", time: "10:00–12:00", courseName: "Math for Business" },
+    { day: "Monday", time: "14:00–16:00", courseName: "React Basics" },
+    { day: "Wednesday", time: "15:00–17:00", courseName: "Info Systems" },
   ];
 
   return (
-    <Box>
+    <Box sx={{ padding: 3 }}>
       <Typography
         variant="h4"
-        sx={{
-          fontFamily: "Assistant",
-          textAlign: "center",
-          marginBottom: "2rem",
-          fontWeight: "bold",
-          color: "#333",
-        }}
+        sx={{ fontFamily: "Assistant", textAlign: "center", fontWeight: "bold", mb: 1 }}
       >
-        Welcome to the Improved Student Portal
+        Welcome to the Student Portal
+      </Typography>
+      <Typography
+        variant="subtitle1"
+        sx={{ textAlign: "center", mb: 4, fontStyle: "italic" }}
+      >
+        Semester started on: {SEMESTER_START}
       </Typography>
 
-      <Box sx={{ display: "flex", flexWrap: "wrap", gap: 3 }}>
-        <InfoBox icon={<AssignmentIcon />} title="Upcoming Assignments" content={nextAssignment ? `Next due: ${nextAssignment}` : "No upcoming assignments"} />
-        <InfoBox icon={<SchoolIcon />} title="Current GPA" content={average || "N/A"} />
-        <InfoBox icon={<CalendarTodayIcon />} title="Upcoming Exams" content={nextAssignment ? `Exam on: ${nextAssignment}` : "No exams scheduled"} />
-        <InfoBox icon={<TimerIcon />} title="Time Until Semester Ends" content={daysLeft} />
-        <InfoBox icon={<ScheduleIcon />} title="Weekly Timetable" content="Displayed below" />
-        <InfoBox icon={<MessageIcon />} title="Lecturer Message" content={lecturerMessage || "No message available"} />
-      </Box>
+      {/* קריאה לקומפוננטה של כרטיסי הבית */}
+      <HomeCards
+        nextAssignment={nextAssignment}
+        averageGPA={averageGPA}
+        sinceStart={sinceStart}
+        untilEnd={untilEnd}
+        lecturerMessage={lecturerMessage}
+      />
 
+      {/* Weekly Timetable */}
+      <Typography
+        variant="h5"
+        sx={{ fontFamily: "Assistant", mb: 2 }}
+      >
+      </Typography>
+
+      {/* הצגת מערכת השעות השבועית */}
       <ScheduleTable schedule={sampleSchedule} />
     </Box>
   );
