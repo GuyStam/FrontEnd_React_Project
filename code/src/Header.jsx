@@ -1,11 +1,12 @@
 import React, { useState, useEffect } from "react";
 import { AppBar, Toolbar, Button, Typography, Box } from "@mui/material";
-import { Link as RouterLink } from "react-router-dom";
+import { useNavigate } from "react-router-dom";  // ייבוא של useNavigate
 import Icons from "./Components/Icons";
 import OnoAcademic from "./OnoAcademic.png";
 
 export default function Header() {
   const [studentName, setStudentName] = useState("");
+  const navigate = useNavigate();  // יצירת הפונקציה navigate
 
   useEffect(() => {
     const saved = JSON.parse(localStorage.getItem("studentInfo"));
@@ -13,6 +14,10 @@ export default function Header() {
       setStudentName(saved.fullName.split(" ")[0]); // ניקח רק את השם הפרטי
     }
   }, []);
+
+  const handleNavigate = (path) => {
+    navigate(path);  // ניווט לדף הרצוי
+  };
 
   return (
     <AppBar
@@ -30,23 +35,23 @@ export default function Header() {
       >
         {/* אזור הכפתורים */}
         <Box sx={{ display: "flex", gap: "1rem" }}>
-          <Button component={RouterLink} to="/" sx={navButtonStyle}>
+          <Button onClick={() => handleNavigate("/")} sx={navButtonStyle}>
             <Icons name="home" sx={iconStyle} />
             <Typography variant="body2" sx={textStyle}>Home</Typography>
           </Button>
-          <Button component={RouterLink} to="/forms" sx={navButtonStyle}>
+          <Button onClick={() => handleNavigate("/forms")} sx={navButtonStyle}>
             <Icons name="forms" sx={iconStyle} />
             <Typography variant="body2" sx={textStyle}>Forms</Typography>
           </Button>
-          <Button component={RouterLink} to="/management" sx={navButtonStyle}>
+          <Button onClick={() => handleNavigate("/management")} sx={navButtonStyle}>
             <Icons name="management" sx={iconStyle} />
             <Typography variant="body2" sx={textStyle}>Management</Typography>
           </Button>
-          <Button component={RouterLink} to="/help" sx={navButtonStyle}>
+          <Button onClick={() => handleNavigate("/help")} sx={navButtonStyle}>
             <Icons name="help" sx={iconStyle} />
             <Typography variant="body2" sx={textStyle}>Help</Typography>
           </Button>
-          <Button component={RouterLink} to="/info" sx={navButtonStyle}>
+          <Button onClick={() => handleNavigate("/info")} sx={navButtonStyle}>
             <Icons name="info" sx={iconStyle} />
             <Typography variant="body2" sx={textStyle}>Personal Info</Typography>
           </Button>
@@ -59,13 +64,13 @@ export default function Header() {
               Hello, {studentName}
             </Typography>
           )}
-          <RouterLink to="/">
+          <Button onClick={() => handleNavigate("/")} sx={{ padding: 0 }}>
             <img
               src={OnoAcademic}
               alt="Ono Academic College Logo"
               style={{ maxHeight: "50px", cursor: "pointer" }}
             />
-          </RouterLink>
+          </Button>
         </Box>
       </Toolbar>
     </AppBar>
