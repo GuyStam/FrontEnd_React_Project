@@ -1,38 +1,32 @@
 import React, { useState, useEffect } from "react";
 import { AppBar, Toolbar, Button, Typography, Box } from "@mui/material";
-import { useNavigate } from "react-router-dom";  // ייבוא של useNavigate
+import { useNavigate } from "react-router-dom";
+import { getStudentInfo } from "./assets/firebase/student"; // קריאה מפיירבייס
 import Icons from "./Components/Icons";
 import OnoAcademic from "./OnoAcademic.png";
 
 export default function Header() {
   const [studentName, setStudentName] = useState("");
-  const navigate = useNavigate();  // יצירת הפונקציה navigate
+  const navigate = useNavigate();
 
   useEffect(() => {
-    const saved = JSON.parse(localStorage.getItem("studentInfo"));
-    if (saved?.fullName) {
-      setStudentName(saved.fullName.split(" ")[0]); // ניקח רק את השם הפרטי
-    }
+    const load = async () => {
+      const saved = await getStudentInfo();
+      if (saved?.fullName) {
+        setStudentName(saved.fullName.split(" ")[0]); // רק השם הפרטי
+      }
+    };
+    load();
   }, []);
 
   const handleNavigate = (path) => {
-    navigate(path);  // ניווט לדף הרצוי
+    navigate(path);
   };
 
   return (
-    <AppBar
-      position="static"
-      sx={{
-        backgroundColor: "#7FC243",
-      }}
-    >
-      <Toolbar
-        sx={{
-          display: "flex",
-          justifyContent: "space-between",
-          alignItems: "center",
-        }}
-      >
+    <AppBar position="static" sx={{ backgroundColor: "#7FC243" }}>
+      <Toolbar sx={{ display: "flex", justifyContent: "space-between", alignItems: "center" }}>
+
         {/* אזור הכפתורים */}
         <Box sx={{ display: "flex", gap: "1rem" }}>
           <Button onClick={() => handleNavigate("/")} sx={navButtonStyle}>
@@ -57,7 +51,7 @@ export default function Header() {
           </Button>
         </Box>
 
-        {/* אזור הימני: ברוך הבא + לוגו */}
+        {/* אזור ימין: ברוך הבא + לוגו */}
         <Box sx={{ display: "flex", alignItems: "center", gap: 2 }}>
           {studentName && (
             <Typography sx={{ color: "white", fontFamily: "Assistant", fontWeight: "bold" }}>
@@ -77,7 +71,7 @@ export default function Header() {
   );
 }
 
-// סטיילינג שחוזר על עצמו
+// סטיילים
 const navButtonStyle = {
   display: "flex",
   flexDirection: "column",

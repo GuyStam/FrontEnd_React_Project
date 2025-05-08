@@ -8,26 +8,31 @@ import {
   Snackbar,
   Alert,
 } from "@mui/material";
+import {
+  getLecturerMessage,
+  setLecturerMessage
+} from "../assets/firebase/settings";
 
-export default function Managements() {
+export default function Management() {
   const navigate = useNavigate();
   const [message, setMessage] = useState("");
   const [success, setSuccess] = useState("");
 
-  // load existing lecturer message
   useEffect(() => {
-    const stored = localStorage.getItem("lecturerMessage") || "";
-    setMessage(stored);
+    const loadMessage = async () => {
+      const saved = await getLecturerMessage();
+      setMessage(saved);
+    };
+    loadMessage();
   }, []);
 
-  const handleSave = () => {
-    localStorage.setItem("lecturerMessage", message);
+  const handleSave = async () => {
+    await setLecturerMessage(message);
     setSuccess("Lecturer message updated");
   };
 
   return (
     <Box sx={{ padding: 3, maxWidth: "900px", margin: "0 auto" }}>
-      {/* כותרת במרכז הדף */}
       <Typography
         variant="h4"
         sx={{
@@ -35,7 +40,7 @@ export default function Managements() {
           textAlign: "center",
           fontWeight: "bold",
           mb: 3,
-          color: "#000", // צבע שחור
+          color: "#000",
         }}
       >
         Management Page
@@ -69,10 +74,7 @@ export default function Managements() {
           label="Message for students"
           value={message}
           onChange={(e) => setMessage(e.target.value)}
-          sx={{
-            backgroundColor: "#F1F8E9", // רקע בהיר
-            borderRadius: 2,
-          }}
+          sx={{ backgroundColor: "#F1F8E9", borderRadius: 2 }}
         />
         <Button
           variant="contained"

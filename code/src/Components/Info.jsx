@@ -1,15 +1,19 @@
 // Info.jsx
 import React, { useState, useEffect } from "react";
-import { Box } from "@mui/material";
-import InfoBox from "../Components/InfoBox"; 
+import { Box, Typography, Grid } from "@mui/material";
+import InfoBox from "../Components/InfoBox";
 import AssignmentIcon from "@mui/icons-material/Assignment";
+import { getStudentInfo } from "../assets/firebase/student";
 
 function Info() {
   const [info, setInfo] = useState(null);
 
   useEffect(() => {
-    const saved = JSON.parse(localStorage.getItem("studentInfo"));
-    if (saved) setInfo(saved);
+    const load = async () => {
+      const saved = await getStudentInfo();
+      if (saved) setInfo(saved);
+    };
+    load();
   }, []);
 
   const buildContent = () => {

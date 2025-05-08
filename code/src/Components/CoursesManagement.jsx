@@ -1,154 +1,256 @@
-// src/Components/CoursesManagement.jsx
 import React, { useState, useEffect } from "react";
 import {
+  Box,
+  Button,
   TextField,
   MenuItem,
-  Button,
-  Snackbar,
-  Alert,
-  Paper,
+  Typography,
   Table,
   TableBody,
   TableCell,
   TableContainer,
   TableHead,
   TableRow,
-  Typography,
-  LinearProgress,
-  Box
+  Paper,
+  CircularProgress,
+  Snackbar,
+  Alert,
 } from "@mui/material";
-import { addCourses, listCourses } from "../assets/firebase/Courses";
-import "../App.css";
-
-// 10 default MIS-related courses
-const defaultCourses = [
-  { courseName: "Business Information Systems", lecturer: "Dr. Smith", year: 2025, semester: "A", nextClass: "2025-09-01T10:00", nextAssignment: "2025-09-08T23:59", grades: { finalAverage: "" } },
-  { courseName: "Database Management",            lecturer: "Prof. Lee",  year: 2025, semester: "A", nextClass: "2025-09-02T12:00", nextAssignment: "2025-09-09T23:59", grades: { finalAverage: "" } },
-  { courseName: "ERP Systems",                    lecturer: "Dr. Patel", year: 2025, semester: "B", nextClass: "2025-10-05T09:00", nextAssignment: "2025-10-12T23:59", grades: { finalAverage: "" } },
-  { courseName: "Data Analytics",                 lecturer: "Dr. Cohen", year: 2025, semester: "B", nextClass: "2025-10-06T11:00", nextAssignment: "2025-10-13T23:59", grades: { finalAverage: "" } },
-  { courseName: "Systems Analysis & Design",      lecturer: "Dr. Garcia",year: 2025, semester: "A", nextClass: "2025-09-03T14:00", nextAssignment: "2025-09-10T23:59", grades: { finalAverage: "" } },
-  { courseName: "Excel Modeling",                 lecturer: "Dr. Alvarez",year: 2025, semester: "A", nextClass: "2025-09-04T16:00", nextAssignment: "2025-09-11T23:59", grades: { finalAverage: "" } },
-  { courseName: "Information Security",           lecturer: "Prof. Rossi",year: 2025, semester: "B", nextClass: "2025-10-07T13:00", nextAssignment: "2025-10-14T23:59", grades: { finalAverage: "" } },
-  { courseName: "Web Programming",                lecturer: "Prof. Kumar",year: 2025, semester: "B", nextClass: "2025-10-08T15:00", nextAssignment: "2025-10-15T23:59", grades: { finalAverage: "" } },
-  { courseName: "Decision Support Systems",       lecturer: "Prof. Wang", year: 2025, semester: "A", nextClass: "2025-09-05T09:30", nextAssignment: "2025-09-12T23:59", grades: { finalAverage: "" } },
-  { courseName: "Business Process Management",    lecturer: "Prof. Nguyen",year: 2025, semester: "A", nextClass: "2025-09-06T11:30", nextAssignment: "2025-09-13T23:59", grades: { finalAverage: "" } }
-];
-
-const initialCourse = {
-  courseName: "",
-  lecturer: "",
-  year: 2025,
-  semester: "",
-  nextClass: new Date().toISOString().slice(0,16),
-  nextAssignment: new Date().toISOString().slice(0,16),
-  grades: { finalAverage: "" }
-};
+import {
+  listCourses,
+  addCourses,
+  updateCourse,
+  deleteCourse,
+} from "../assets/firebase/Courses";
 
 export default function CoursesManagement() {
   const [courses, setCourses] = useState([]);
-  const [newCourse, setNewCourse] = useState(initialCourse);
-  const [success, setSuccess] = useState("");
   const [loading, setLoading] = useState(true);
+  const [newCourse, setNewCourse] = useState({
+    courseName: "",
+    lecturer: "",
+    year: new Date().getFullYear(),
+    semester: "A",
+    nextClass: new Date().toISOString().slice(0, 16),
+    nextAssignment: new Date().toISOString().slice(0, 16),
+    grades: { finalAverage: "" },
+  });
+  const [editId, setEditId] = useState(null);
+  const [message, setMessage] = useState("");
 
-  // on mount: fetch from Firestore, merge with defaults
+  const seedCourses = [
+    { courseName: "Database Systems", lecturer: "Dr. Cohen", year: 2025, semester: "A", nextClass: new Date().toISOString(), nextAssignment: new Date().toISOString(), grades: { finalAverage: 85 } },
+    { courseName: "Network Fundamentals", lecturer: "Prof. Levy", year: 2025, semester: "B", nextClass: new Date().toISOString(), nextAssignment: new Date().toISOString(), grades: { finalAverage: 78 } },
+    { courseName: "Information Security", lecturer: "Dr. Bar", year: 2025, semester: "A", nextClass: new Date().toISOString(), nextAssignment: new Date().toISOString(), grades: { finalAverage: 90 } },
+    { courseName: "Web Development", lecturer: "Ms. Mor", year: 2025, semester: "B", nextClass: new Date().toISOString(), nextAssignment: new Date().toISOString(), grades: { finalAverage: 88 } },
+    { courseName: "ERP Systems", lecturer: "Mr. Yaron", year: 2025, semester: "Summer", nextClass: new Date().toISOString(), nextAssignment: new Date().toISOString(), grades: { finalAverage: 82 } },
+    { courseName: "Business Intelligence", lecturer: "Dr. Nir", year: 2025, semester: "A", nextClass: new Date().toISOString(), nextAssignment: new Date().toISOString(), grades: { finalAverage: 87 } },
+    { courseName: "Project Management", lecturer: "Mrs. Dan", year: 2025, semester: "B", nextClass: new Date().toISOString(), nextAssignment: new Date().toISOString(), grades: { finalAverage: 91 } },
+    { courseName: "Cloud Computing", lecturer: "Mr. Ron", year: 2025, semester: "A", nextClass: new Date().toISOString(), nextAssignment: new Date().toISOString(), grades: { finalAverage: 80 } },
+    { courseName: "UX/UI Design", lecturer: "Ms. Ella", year: 2025, semester: "B", nextClass: new Date().toISOString(), nextAssignment: new Date().toISOString(), grades: { finalAverage: 89 } },
+    { courseName: "System Analysis", lecturer: "Dr. Ziv", year: 2025, semester: "Summer", nextClass: new Date().toISOString(), nextAssignment: new Date().toISOString(), grades: { finalAverage: 86 } },
+  ];
+
+  // Load courses and seed if empty
   useEffect(() => {
-    listCourses().then(fetched => {
-      const merged = [...defaultCourses, ...fetched];
-      setCourses(merged);
-      localStorage.setItem("courses", JSON.stringify(merged));
-    }).finally(() => setLoading(false));
+    const fetchData = async () => {
+      setLoading(true);
+      const all = await listCourses();
+      if (all.length === 0) {
+        for (let c of seedCourses) {
+          await addCourses(c);
+        }
+        const seeded = await listCourses();
+        setCourses(seeded);
+      } else {
+        setCourses(all);
+      }
+      setLoading(false);
+    };
+    fetchData();
   }, []);
 
-  const handleChange = e => {
+  const handleChange = (e) => {
     const { name, value } = e.target;
-    setNewCourse(prev =>
-      name === "finalAverage"
-        ? { ...prev, grades: { finalAverage: value } }
-        : { ...prev, [name]: value }
-    );
+    if (name === "finalAverage") {
+      setNewCourse(prev => ({
+        ...prev,
+        grades: { finalAverage: value }
+      }));
+    } else {
+      setNewCourse(prev => ({ ...prev, [name]: value }));
+    }
   };
 
-  const handleSubmit = () => {
+  const handleSubmit = async () => {
     setLoading(true);
-    addCourses(newCourse)
-      .then(() => listCourses())
-      .then(fetched => {
-        const merged = [...defaultCourses, ...fetched];
-        setCourses(merged);
-        localStorage.setItem("courses", JSON.stringify(merged));
-        setSuccess("Course added");
-        setNewCourse(initialCourse);
-      })
-      .finally(() => setLoading(false));
+    try {
+      if (editId) {
+        await updateCourse(editId, {
+          courseName: newCourse.courseName,
+          lecturer: newCourse.lecturer,
+          year: Number(newCourse.year),
+          semester: newCourse.semester,
+          nextClass: newCourse.nextClass,
+          nextAssignment: newCourse.nextAssignment,
+          grades: { finalAverage: Number(newCourse.grades.finalAverage) }
+        });
+        setMessage("Course updated");
+      } else {
+        await addCourses(newCourse);
+        setMessage("Course added");
+      }
+      const updated = await listCourses();
+      setCourses(updated);
+      setEditId(null);
+      setNewCourse({
+        courseName: "",
+        lecturer: "",
+        year: new Date().getFullYear(),
+        semester: "A",
+        nextClass: new Date().toISOString().slice(0,16),
+        nextAssignment: new Date().toISOString().slice(0,16),
+        grades: { finalAverage: "" },
+      });
+    } catch (err) {
+      console.error(err);
+      setMessage("Error saving course");
+    }
+    setLoading(false);
   };
 
-  if (loading) {
-    return (
-      <Box sx={{ display: "flex", width: "100%" }}>
-        <LinearProgress sx={{ width: "100%" }} />
-      </Box>
-    );
-  }
+  const handleEdit = (course) => {
+    setEditId(course.id);
+    setNewCourse({
+      ...course,
+      nextClass: course.nextClass.slice(0,16),
+      nextAssignment: course.nextAssignment.slice(0,16)
+    });
+  };
+
+  const handleDelete = async (id) => {
+    setLoading(true);
+    try {
+      await deleteCourse(id);
+      const updated = await listCourses();
+      setCourses(updated);
+      setMessage("Course deleted");
+    } catch (err) {
+      console.error(err);
+      setMessage("Error deleting course");
+    }
+    setLoading(false);
+  };
 
   return (
-    <div>
-      <Typography variant="h4" sx={{ textAlign: "center", fontFamily: "Assistant", fontWeight: "bold", mb: 3 }}>
+    <Box sx={{ p: 3 }}>
+      <Typography variant="h4" sx={{ fontFamily: 'Assistant', fontWeight: 'bold', mb: 2 }}>
         Courses Management
       </Typography>
 
-      <Box sx={{ display: "flex", flexWrap: "wrap", gap: 2, mb: 2 }}>
-        <TextField label="Course Name"    name="courseName"   value={newCourse.courseName}   onChange={handleChange} />
-        <TextField label="Lecturer"       name="lecturer"     value={newCourse.lecturer}     onChange={handleChange} />
-        <TextField label="Year"           name="year"         type="number" value={newCourse.year}        onChange={handleChange} />
-        <TextField select label="Semester" name="semester"   value={newCourse.semester}     onChange={handleChange}>
+      <Box sx={{ display: 'flex', flexWrap: 'wrap', gap: 2, mb: 2 }}>
+        <TextField
+          label="Course Name"
+          name="courseName"
+          value={newCourse.courseName}
+          onChange={handleChange}
+        />
+        <TextField
+          label="Lecturer"
+          name="lecturer"
+          value={newCourse.lecturer}
+          onChange={handleChange}
+        />
+        <TextField
+          label="Year"
+          name="year"
+          type="number"
+          value={newCourse.year}
+          onChange={handleChange}
+          sx={{ width: 100 }}
+        />
+        <TextField
+          select
+          label="Semester"
+          name="semester"
+          value={newCourse.semester}
+          onChange={handleChange}
+          sx={{ width: 120 }}
+        >
           <MenuItem value="A">A</MenuItem>
           <MenuItem value="B">B</MenuItem>
           <MenuItem value="Summer">Summer</MenuItem>
         </TextField>
-        <TextField label="Next Class"     name="nextClass"    type="datetime-local" InputLabelProps={{ shrink:true }} 
-          value={newCourse.nextClass}     onChange={handleChange} />
-        <TextField label="Next Assignment" name="nextAssignment" type="datetime-local" InputLabelProps={{ shrink:true }} 
-          value={newCourse.nextAssignment} onChange={handleChange} />
-        <TextField label="Final Average"  name="finalAverage" type="number" value={newCourse.grades.finalAverage} onChange={handleChange} />
+        <TextField
+          label="Next Class"
+          name="nextClass"
+          type="datetime-local"
+          value={newCourse.nextClass}
+          onChange={handleChange}
+          InputLabelProps={{ shrink: true }}
+        />
+        <TextField
+          label="Next Assignment"
+          name="nextAssignment"
+          type="datetime-local"
+          value={newCourse.nextAssignment}
+          onChange={handleChange}
+          InputLabelProps={{ shrink: true }}
+        />
+        <TextField
+          label="Final Average"
+          name="finalAverage"
+          type="number"
+          value={newCourse.grades.finalAverage}
+          onChange={handleChange}
+          sx={{ width: 140 }}
+        />
+        <Button
+          variant="contained"
+          onClick={handleSubmit}
+          sx={{ backgroundColor: '#7FC243', alignSelf: 'center', height: 40 }}
+          disabled={loading}
+        >
+          {editId ? 'Update' : 'Add'}
+        </Button>
       </Box>
 
-      <Button variant="contained" onClick={handleSubmit} sx={{ backgroundColor: "#7FC243", mb: 2 }}>
-        Add Course
-      </Button>
-
-      <TableContainer component={Paper}>
-        <Table size="small">
-          <TableHead sx={{ backgroundColor: "#eee" }}>
-            <TableRow>
-              <TableCell>Course Name</TableCell>
-              <TableCell>Lecturer</TableCell>
-              <TableCell>Year</TableCell>
-              <TableCell>Semester</TableCell>
-              <TableCell>Next Class</TableCell>
-              <TableCell>Next Assignment</TableCell>
-              <TableCell>Final Avg</TableCell>
-            </TableRow>
-          </TableHead>
-          <TableBody>
-            {courses.map((c, idx) => (
-              <TableRow key={idx}>
-                <TableCell>{c.courseName}</TableCell>
-                <TableCell>{c.lecturer}</TableCell>
-                <TableCell>{c.year}</TableCell>
-                <TableCell>{c.semester}</TableCell>
-                <TableCell>{new Date(c.nextClass).toLocaleString("en-GB")}</TableCell>
-                <TableCell>{new Date(c.nextAssignment).toLocaleString("en-GB")}</TableCell>
-                <TableCell>{c.grades.finalAverage}</TableCell>
+      {loading ? (
+        <Box sx={{ textAlign: 'center', mt: 4 }}><CircularProgress /></Box>
+      ) : (
+        <TableContainer component={Paper}>
+          <Table>
+            <TableHead sx={{ backgroundColor: '#eafaf1' }}>
+              <TableRow>
+                {['Name', 'Lecturer', 'Year', 'Semester', 'Next Class', 'Next Assignment', 'Avg', 'Actions'].map((h) => (
+                  <TableCell key={h} sx={{ fontFamily: 'Assistant', fontWeight: 'bold' }}>{h}</TableCell>
+                ))}
               </TableRow>
-            ))}
-          </TableBody>
-        </Table>
-      </TableContainer>
+            </TableHead>
+            <TableBody>
+              {courses.map((c) => (
+                <TableRow key={c.id}>
+                  <TableCell>{c.courseName}</TableCell>
+                  <TableCell>{c.lecturer}</TableCell>
+                  <TableCell>{c.year}</TableCell>
+                  <TableCell>{c.semester}</TableCell>
+                  <TableCell>{new Date(c.nextClass).toLocaleString('en-GB', { hour12: false })}</TableCell>
+                  <TableCell>{new Date(c.nextAssignment).toLocaleString('en-GB', { hour12: false })}</TableCell>
+                  <TableCell>{c.grades.finalAverage}</TableCell>
+                  <TableCell>
+                    <Button size="small" onClick={() => handleEdit(c)} sx={{ mr: 1 }}>Edit</Button>
+                    <Button size="small" color="error" onClick={() => handleDelete(c.id)}>Delete</Button>
+                  </TableCell>
+                </TableRow>
+              ))}
+            </TableBody>
+          </Table>
+        </TableContainer>
+      )}
 
-      <Snackbar open={!!success} autoHideDuration={3000} onClose={() => setSuccess("")}>
-        <Alert severity="success">{success}</Alert>
+      <Snackbar open={!!message} autoHideDuration={3000} onClose={() => setMessage('')}>
+        <Alert severity="info">{message}</Alert>
       </Snackbar>
-    </div>
+    </Box>
   );
 }
-// CoursesManagement.jsx

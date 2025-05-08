@@ -10,20 +10,33 @@ import {
   Typography,
   TextField,
   TableSortLabel,
+  CircularProgress,
 } from "@mui/material";
+import { listGrades } from "../assets/firebase/Grades";
 import "../App.css";
 
 export default function GradesForm() {
   const [courses, setCourses] = useState([]);
+  const [loading, setLoading] = useState(true);
   const [searchTerm, setSearchTerm] = useState("");
   const [orderBy, setOrderBy] = useState("courseName");
   const [orderDirection, setOrderDirection] = useState("asc");
 
   useEffect(() => {
-    const storedCourses = JSON.parse(localStorage.getItem("courses"));
-    if (storedCourses) {
-      setCourses(storedCourses);
-    }
+    const load = async () => {
+      const grades = await listGrades();
+      const transformed = grades.map(g => ({
+        courseName: g.courseName,
+        grades: {
+          examGrade: g.examGrade,
+          assignmentGrade: g.assignmentGrade,
+          finalAverage: g.finalAverage
+        }
+      }));
+      setCourses(transformed);
+      setLoading(false);
+    };
+    load();
   }, []);
 
   const handleSort = (field) => {
@@ -32,7 +45,6 @@ export default function GradesForm() {
     setOrderBy(field);
   };
 
-  // only show courses that have grades
   const graded = courses.filter(
     (c) =>
       c.grades &&
@@ -41,7 +53,6 @@ export default function GradesForm() {
       c.grades.finalAverage !== ""
   );
 
-  // filter by course name or any grade
   const filtered = graded.filter(
     (c) =>
       c.courseName.toLowerCase().includes(searchTerm.toLowerCase()) ||
@@ -50,7 +61,6 @@ export default function GradesForm() {
       c.grades.finalAverage.toString().includes(searchTerm)
   );
 
-  // sort by field
   const sorted = [...filtered].sort((a, b) => {
     const aVal =
       orderBy === "courseName" ? a.courseName.toLowerCase() : a.grades[orderBy];
@@ -74,7 +84,7 @@ export default function GradesForm() {
         variant="h4"
         sx={{
           textAlign: "center",
-          color: "#000", // צבע שחור
+          color: "#000",
           fontFamily: "Assistant",
           fontWeight: "bold",
           mb: 3,
@@ -91,7 +101,11 @@ export default function GradesForm() {
         value={searchTerm}
         onChange={(e) => setSearchTerm(e.target.value)}
       />
-      {sorted.length === 0 ? (
+      {loading ? (
+        <div style={{ textAlign: "center", marginTop: 40 }}>
+          <CircularProgress />
+        </div>
+      ) : sorted.length === 0 ? (
         <Typography variant="body1" sx={{ textAlign: "center", mt: 4 }}>
           No grades to display.
         </Typography>

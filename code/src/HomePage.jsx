@@ -1,7 +1,9 @@
 import React, { useEffect, useState } from "react";
-import { Box, Typography, Grid } from "@mui/material";
-import HomeCards from "./Components/HomeCards"; // ייבוא של HomeCards
-import ScheduleTable from "./Components/ScheduleTable"; // ייבוא של מערכת השעות השבועית
+import { Box, Typography } from "@mui/material";
+import HomeCards from "./Components/HomeCards";
+import ScheduleTable from "./Components/ScheduleTable";
+import { listCourses } from "./assets/firebase/Courses";
+import { getLecturerMessage } from "./assets/firebase/settings";
 
 const getDaysUntil = (dateStr) => {
   const now = new Date();
@@ -18,16 +20,16 @@ export default function HomePage() {
   const [lecturerMessage, setLecturerMessage] = useState("");
 
   useEffect(() => {
-    // load courses + grades from localStorage
-    const stored = localStorage.getItem("courses");
-    if (stored) setCourses(JSON.parse(stored));
+    const loadData = async () => {
+      const data = await listCourses();
+      setCourses(data);
 
-    // load lecturer message
-    const msg = localStorage.getItem("lecturerMessage");
-    if (msg) setLecturerMessage(msg);
+      const msg = await getLecturerMessage();
+      setLecturerMessage(msg);
+    };
+    loadData();
   }, []);
 
-  // compute Current GPA
   const gradeValues = courses
     .map(c => Number(c.grades?.finalAverage))
     .filter(v => !isNaN(v));
@@ -36,18 +38,15 @@ export default function HomePage() {
       ? (gradeValues.reduce((a, b) => a + b, 0) / gradeValues.length).toFixed(2)
       : "N/A";
 
-  // next assignment due
   const nextAssignment = courses
     .map(c => c.nextAssignment)
     .filter(Boolean)
     .sort()[0];
 
-  // days since start / until end
   const now = new Date();
   const sinceStart = Math.floor((now - new Date(SEMESTER_START)) / (1000 * 60 * 60 * 24));
   const untilEnd = getDaysUntil(SEMESTER_END);
 
-  // מערך דוגמה למערכת השעות השבועית
   const sampleSchedule = [
     { day: "Sunday", time: "10:00–12:00", courseName: "Math for Business" },
     { day: "Monday", time: "14:00–16:00", courseName: "React Basics" },
@@ -69,7 +68,6 @@ export default function HomePage() {
         Semester started on: {SEMESTER_START}
       </Typography>
 
-      {/* קריאה לקומפוננטה של כרטיסי הבית */}
       <HomeCards
         nextAssignment={nextAssignment}
         averageGPA={averageGPA}
@@ -78,14 +76,11 @@ export default function HomePage() {
         lecturerMessage={lecturerMessage}
       />
 
-      {/* Weekly Timetable */}
       <Typography
         variant="h5"
         sx={{ fontFamily: "Assistant", mb: 2 }}
-      >
-      </Typography>
+      ></Typography>
 
-      {/* הצגת מערכת השעות השבועית */}
       <ScheduleTable schedule={sampleSchedule} />
     </Box>
   );

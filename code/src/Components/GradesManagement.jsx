@@ -1,8 +1,8 @@
 import React, { useState, useEffect } from "react";
 import {
+  Box,
   TextField,
   Button,
-  MenuItem,
   Snackbar,
   Alert,
   Table,
@@ -13,211 +13,169 @@ import {
   TableRow,
   Paper,
   Typography,
+  CircularProgress
 } from "@mui/material";
-import "../App.css";
+import {
+  listGrades,
+  addGrade,
+  updateGrade,
+  deleteGrade
+} from "../assets/firebase/Grades";
 
 export default function GradesManagement() {
-  const [courses, setCourses] = useState([]);
-  const [selectedIdx, setSelectedIdx] = useState("");
-  const [grades, setGrades] = useState({
+  const [grades, setGrades] = useState([]);
+  const [loading, setLoading] = useState(true);
+  const [newGrade, setNewGrade] = useState({
+    courseName: "",
     examGrade: "",
     assignmentGrade: "",
-    finalAverage: "",
+    finalAverage: ""
   });
-  const [errors, setErrors] = useState({});
-  const [success, setSuccess] = useState("");
+  const [editId, setEditId] = useState(null);
+  const [message, setMessage] = useState("");
 
   useEffect(() => {
-    const stored = localStorage.getItem("courses");
-    if (stored) setCourses(JSON.parse(stored));
+    const fetch = async () => {
+      setLoading(true);
+      const data = await listGrades();
+      setGrades(data);
+      setLoading(false);
+    };
+    fetch();
   }, []);
 
-  const handleSelect = (e) => {
-    const idx = e.target.value;
-    setSelectedIdx(idx);
-    setErrors({});
-    if (idx !== "") {
-      const g = courses[idx].grades || {};
-      setGrades({
-        examGrade: g.examGrade ?? "",
-        assignmentGrade: g.assignmentGrade ?? "",
-        finalAverage: g.finalAverage ?? "",
-      });
-    } else {
-      setGrades({ examGrade: "", assignmentGrade: "", finalAverage: "" });
-    }
-  };
-
   const handleChange = (e) => {
-    const { name, value, type } = e.target;
-    setGrades((prev) => ({
-      ...prev,
-      [name]: type === "number" ? value : value,
-    }));
-    setErrors((prev) => ({ ...prev, [name]: false }));
+    const { name, value } = e.target;
+    setNewGrade(prev => ({ ...prev, [name]: value }));
   };
 
-  const validate = () => {
-    const newErrors = {};
-    if (selectedIdx === "") {
-      newErrors.course = "Select a course";
+  const handleSubmit = async () => {
+    const { courseName, examGrade, assignmentGrade, finalAverage } = newGrade;
+    if (!courseName || !examGrade || !assignmentGrade || !finalAverage) {
+      setMessage("All fields are required");
+      return;
     }
-    ["examGrade", "assignmentGrade", "finalAverage"].forEach((f) => {
-      const val = grades[f];
-      if (val === "") {
-        newErrors[f] = "Required";
+    setLoading(true);
+    try {
+      if (editId) {
+        await updateGrade(editId, newGrade);
+        setMessage("Grade updated");
       } else {
-        const num = Number(val);
-        if (isNaN(num) || num < 0 || num > 100) {
-          newErrors[f] = "Must be 0–100";
-        }
+        await addGrade(newGrade);
+        setMessage("Grade added");
       }
-    });
-    setErrors(newErrors);
-    return Object.keys(newErrors).length === 0;
-  };
-
-  const save = () => {
-    const updated = [...courses];
-    updated[selectedIdx].grades = {
-      examGrade: Number(grades.examGrade),
-      assignmentGrade: Number(grades.assignmentGrade),
-      finalAverage: Number(grades.finalAverage),
-    };
-    localStorage.setItem("courses", JSON.stringify(updated));
-    setCourses(updated);
-    setSuccess("Grades saved!");
-  };
-
-  const handleRemove = (idx) => {
-    const updated = [...courses];
-    delete updated[idx].grades;
-    localStorage.setItem("courses", JSON.stringify(updated));
-    setCourses(updated);
-    setSuccess("Grades removed");
-    if (selectedIdx === String(idx)) {
-      setSelectedIdx("");
-      setGrades({ examGrade: "", assignmentGrade: "", finalAverage: "" });
+      const updated = await listGrades();
+      setGrades(updated);
+      setEditId(null);
+      setNewGrade({ courseName: "", examGrade: "", assignmentGrade: "", finalAverage: "" });
+    } catch (err) {
+      console.error(err);
+      setMessage("Error saving grade");
     }
+    setLoading(false);
   };
 
-  const handleSubmit = () => {
-    if (!validate()) return;
-    save();
+  const handleEdit = (grade) => {
+    setEditId(grade.id);
+    setNewGrade({
+      courseName: grade.courseName,
+      examGrade: grade.examGrade,
+      assignmentGrade: grade.assignmentGrade,
+      finalAverage: grade.finalAverage
+    });
+  };
+
+  const handleDelete = async (id) => {
+    setLoading(true);
+    try {
+      await deleteGrade(id);
+      const updated = await listGrades();
+      setGrades(updated);
+      setMessage("Grade deleted");
+    } catch (err) {
+      console.error(err);
+      setMessage("Error deleting grade");
+    }
+    setLoading(false);
   };
 
   return (
-    <div>
-      <Typography
-        variant="h5"
-        sx={{
-          textAlign: "center",
-          color: "#000", // צבע שחור
-          fontFamily: "Assistant",
-          fontWeight: "bold",
-          mb: 3,
-        }}
-      >
-       Grades Management
+    <Box sx={{ p: 3 }}>
+      <Typography variant="h5" sx={{ fontFamily: 'Assistant', fontWeight: 'bold', mb: 2 }}>
+        Grades Management
       </Typography>
 
-      <TextField
-        select
-        label="Course"
-        value={selectedIdx}
-        onChange={handleSelect}
-        error={!!errors.course}
-        helperText={errors.course}
-        fullWidth
-        sx={{ mb: 2 }}
-      >
-        <MenuItem value="">-- Select Course --</MenuItem>
-        {courses.map((c, idx) => (
-          <MenuItem key={idx} value={String(idx)}>
-            {c.courseName}
-          </MenuItem>
-        ))}
-      </TextField>
-
-      <div style={{ display: "flex", gap: "1rem", flexWrap: "wrap", marginBottom: "1rem" }}>
+      <Box sx={{ display: 'flex', flexWrap: 'wrap', gap: 2, mb: 2 }}>
         <TextField
-          name="examGrade"
+          label="Course Name"
+          name="courseName"
+          value={newGrade.courseName}
+          onChange={handleChange}
+        />
+        <TextField
           label="Exam Grade"
+          name="examGrade"
           type="number"
-          value={grades.examGrade}
+          value={newGrade.examGrade}
           onChange={handleChange}
-          error={!!errors.examGrade}
-          helperText={errors.examGrade}
-          required
         />
         <TextField
-          name="assignmentGrade"
           label="Assignment Grade"
+          name="assignmentGrade"
           type="number"
-          value={grades.assignmentGrade}
+          value={newGrade.assignmentGrade}
           onChange={handleChange}
-          error={!!errors.assignmentGrade}
-          helperText={errors.assignmentGrade}
-          required
         />
         <TextField
-          name="finalAverage"
           label="Final Average"
+          name="finalAverage"
           type="number"
-          value={grades.finalAverage}
+          value={newGrade.finalAverage}
           onChange={handleChange}
-          error={!!errors.finalAverage}
-          helperText={errors.finalAverage}
-          required
         />
-      </div>
+        <Button
+          variant="contained"
+          onClick={handleSubmit}
+          sx={{ backgroundColor: '#7FC243', alignSelf: 'center', height: 40 }}
+          disabled={loading}
+        >
+          {editId ? 'Update' : 'Add'}
+        </Button>
+      </Box>
 
-      <Button
-        variant="contained"
-        onClick={handleSubmit}
-        disabled={!selectedIdx}
-        sx={{ backgroundColor: "#7FC243", mb: 3 }}
-      >
-        Save
-      </Button>
-
-      <TableContainer component={Paper}>
-        <Table>
-          <TableHead sx={{ backgroundColor: "#eee" }}>
-            <TableRow>
-              <TableCell>Course</TableCell>
-              <TableCell>Exam</TableCell>
-              <TableCell>Assignment</TableCell>
-              <TableCell>Final Avg</TableCell>
-              <TableCell>Actions</TableCell>
-            </TableRow>
-          </TableHead>
-          <TableBody>
-            {courses.map((c, idx) => (
-              <TableRow key={idx}>
-                <TableCell>{c.courseName}</TableCell>
-                <TableCell>{c.grades?.examGrade ?? "-"}</TableCell>
-                <TableCell>{c.grades?.assignmentGrade ?? "-"}</TableCell>
-                <TableCell>{c.grades?.finalAverage ?? "-"}</TableCell>
-                <TableCell>
-                  <Button size="small" variant="outlined" onClick={() => setSelectedIdx(String(idx))}>
-                    Edit
-                  </Button>
-                  <Button size="small" variant="outlined" color="error" onClick={() => handleRemove(idx)}>
-                    Remove
-                  </Button>
-                </TableCell>
+      {loading ? (
+        <Box sx={{ textAlign: 'center', mt: 4 }}><CircularProgress /></Box>
+      ) : (
+        <TableContainer component={Paper}>
+          <Table>
+            <TableHead sx={{ backgroundColor: '#eafaf1' }}>
+              <TableRow>
+                {['Course', 'Exam', 'Assignment', 'Average', 'Actions'].map((h) => (
+                  <TableCell key={h} sx={{ fontFamily: 'Assistant', fontWeight: 'bold' }}>{h}</TableCell>
+                ))}
               </TableRow>
-            ))}
-          </TableBody>
-        </Table>
-      </TableContainer>
+            </TableHead>
+            <TableBody>
+              {grades.map((g) => (
+                <TableRow key={g.id}>
+                  <TableCell>{g.courseName}</TableCell>
+                  <TableCell>{g.examGrade}</TableCell>
+                  <TableCell>{g.assignmentGrade}</TableCell>
+                  <TableCell>{g.finalAverage}</TableCell>
+                  <TableCell>
+                    <Button size="small" onClick={() => handleEdit(g)} sx={{ mr: 1 }}>Edit</Button>
+                    <Button size="small" color="error" onClick={() => handleDelete(g.id)}>Delete</Button>
+                  </TableCell>
+                </TableRow>
+              ))}
+            </TableBody>
+          </Table>
+        </TableContainer>
+      )}
 
-      <Snackbar open={!!success} autoHideDuration={3000} onClose={() => setSuccess("")}>
-        <Alert severity="success" sx={{ width: "100%" }}>
-          {success}
-        </Alert>
+      <Snackbar open={!!message} autoHideDuration={3000} onClose={() => setMessage('')}>
+        <Alert severity="info">{message}</Alert>
       </Snackbar>
-    </div>
+    </Box>
   );
 }
