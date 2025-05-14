@@ -15,6 +15,7 @@ import {
   CircularProgress,
   Snackbar,
   Alert,
+  LinearProgress,
 } from "@mui/material";
 import {
   listCourses,
@@ -26,6 +27,7 @@ import {
 export default function CoursesManagement() {
   const [courses, setCourses] = useState([]);
   const [loading, setLoading] = useState(true);
+  const [isEditMode, setIsEditMode] = useState(false);
   const [newCourse, setNewCourse] = useState({
     courseName: "",
     lecturer: "",
@@ -51,7 +53,6 @@ export default function CoursesManagement() {
     { courseName: "System Analysis", lecturer: "Dr. Ziv", year: 2025, semester: "Summer", nextClass: new Date().toISOString(), nextAssignment: new Date().toISOString(), grades: { finalAverage: 86 } },
   ];
 
-  // Load courses and seed if empty
   useEffect(() => {
     const fetchData = async () => {
       setLoading(true);
@@ -103,13 +104,14 @@ export default function CoursesManagement() {
       const updated = await listCourses();
       setCourses(updated);
       setEditId(null);
+      setIsEditMode(false);
       setNewCourse({
         courseName: "",
         lecturer: "",
         year: new Date().getFullYear(),
         semester: "A",
-        nextClass: new Date().toISOString().slice(0,16),
-        nextAssignment: new Date().toISOString().slice(0,16),
+        nextClass: new Date().toISOString().slice(0, 16),
+        nextAssignment: new Date().toISOString().slice(0, 16),
         grades: { finalAverage: "" },
       });
     } catch (err) {
@@ -120,12 +122,18 @@ export default function CoursesManagement() {
   };
 
   const handleEdit = (course) => {
+    setLoading(true);
+    setIsEditMode(true);
     setEditId(course.id);
-    setNewCourse({
-      ...course,
-      nextClass: course.nextClass.slice(0,16),
-      nextAssignment: course.nextAssignment.slice(0,16)
-    });
+
+    setTimeout(() => {
+      setNewCourse({
+        ...course,
+        nextClass: course.nextClass.slice(0, 16),
+        nextAssignment: course.nextAssignment.slice(0, 16),
+      });
+      setLoading(false);
+    }, 500); // סימולציה של "טעינת" נתונים
   };
 
   const handleDelete = async (id) => {
@@ -149,75 +157,35 @@ export default function CoursesManagement() {
       </Typography>
 
       <Box sx={{ display: 'flex', flexWrap: 'wrap', gap: 2, mb: 2 }}>
-        <TextField
-          label="Course Name"
-          name="courseName"
-          value={newCourse.courseName}
-          onChange={handleChange}
-        />
-        <TextField
-          label="Lecturer"
-          name="lecturer"
-          value={newCourse.lecturer}
-          onChange={handleChange}
-        />
-        <TextField
-          label="Year"
-          name="year"
-          type="number"
-          value={newCourse.year}
-          onChange={handleChange}
-          sx={{ width: 100 }}
-        />
-        <TextField
-          select
-          label="Semester"
-          name="semester"
-          value={newCourse.semester}
-          onChange={handleChange}
-          sx={{ width: 120 }}
-        >
+        <TextField label="Course Name" name="courseName" value={newCourse.courseName} onChange={handleChange} />
+        <TextField label="Lecturer" name="lecturer" value={newCourse.lecturer} onChange={handleChange} />
+        <TextField label="Year" name="year" type="number" value={newCourse.year} onChange={handleChange} sx={{ width: 100 }} />
+        <TextField select label="Semester" name="semester" value={newCourse.semester} onChange={handleChange} sx={{ width: 120 }}>
           <MenuItem value="A">A</MenuItem>
           <MenuItem value="B">B</MenuItem>
           <MenuItem value="Summer">Summer</MenuItem>
         </TextField>
-        <TextField
-          label="Next Class"
-          name="nextClass"
-          type="datetime-local"
-          value={newCourse.nextClass}
-          onChange={handleChange}
-          InputLabelProps={{ shrink: true }}
-        />
-        <TextField
-          label="Next Assignment"
-          name="nextAssignment"
-          type="datetime-local"
-          value={newCourse.nextAssignment}
-          onChange={handleChange}
-          InputLabelProps={{ shrink: true }}
-        />
-        <TextField
-          label="Final Average"
-          name="finalAverage"
-          type="number"
-          value={newCourse.grades.finalAverage}
-          onChange={handleChange}
-          sx={{ width: 140 }}
-        />
+        <TextField label="Next Class" name="nextClass" type="datetime-local" value={newCourse.nextClass} onChange={handleChange} InputLabelProps={{ shrink: true }} />
+        <TextField label="Next Assignment" name="nextAssignment" type="datetime-local" value={newCourse.nextAssignment} onChange={handleChange} InputLabelProps={{ shrink: true }} />
+        <TextField label="Final Average" name="finalAverage" type="number" value={newCourse.grades.finalAverage} onChange={handleChange} sx={{ width: 140 }} />
+
         <Button
           variant="contained"
           onClick={handleSubmit}
           sx={{ backgroundColor: '#7FC243', alignSelf: 'center', height: 40 }}
           disabled={loading}
         >
-          {editId ? 'Update' : 'Add'}
+          {loading ? <CircularProgress size={24} color="inherit" /> : (isEditMode ? 'Update' : 'Add')}
         </Button>
       </Box>
 
-      {loading ? (
-        <Box sx={{ textAlign: 'center', mt: 4 }}><CircularProgress /></Box>
-      ) : (
+      {loading && (
+        <Box sx={{ width: '100%', mt: 2 }}>
+          <LinearProgress />
+        </Box>
+      )}
+
+      {!loading && (
         <TableContainer component={Paper}>
           <Table>
             <TableHead sx={{ backgroundColor: '#eafaf1' }}>
