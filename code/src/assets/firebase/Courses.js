@@ -3,6 +3,7 @@ import {
   addDoc,
   collection,
   getDocs,
+  getDoc,
   updateDoc,
   deleteDoc,
   doc
@@ -48,6 +49,13 @@ export async function listCourses() {
     id: doc.id,
     ...doc.data()
   }));
+}
+
+// שליפת קורס יחיד לפי ID
+export async function getCourse(courseId) {
+  const courseRef = doc(firestore, COL, courseId);
+  const snap = await getDoc(courseRef);
+  return snap.exists() ? { id: snap.id, ...snap.data() } : null;
 }
 
 // עדכון קורס לפי ID

@@ -1,5 +1,7 @@
+// src/Components/GradesForm.jsx
 import React, { useState, useEffect } from "react";
 import {
+  Box,
   Table,
   TableBody,
   TableCell,
@@ -11,33 +13,35 @@ import {
   TextField,
   TableSortLabel,
   CircularProgress,
-} from "@mui/material";
-import { listGrades } from "../assets/firebase/Grades";
-import "../App.css";
+  Button,
+} from "@mui/material";              // הוספנו Box
+import { useNavigate, useParams } from "react-router-dom";
+import { listGrades, getGrade } from "../assets/firebase/Grades";
 
 export default function GradesForm() {
-  const [courses, setCourses] = useState([]);
+  const [grades, setGrades] = useState([]);
   const [loading, setLoading] = useState(true);
   const [searchTerm, setSearchTerm] = useState("");
   const [orderBy, setOrderBy] = useState("courseName");
   const [orderDirection, setOrderDirection] = useState("asc");
 
+  const navigate = useNavigate();
+  const { gradeId } = useParams();
+
   useEffect(() => {
     const load = async () => {
-      const grades = await listGrades();
-      const transformed = grades.map(g => ({
-        courseName: g.courseName,
-        grades: {
-          examGrade: g.examGrade,
-          assignmentGrade: g.assignmentGrade,
-          finalAverage: g.finalAverage
-        }
-      }));
-      setCourses(transformed);
+      setLoading(true);
+      if (gradeId) {
+        const single = await getGrade(gradeId);
+        setGrades(single ? [single] : []);
+      } else {
+        const all = await listGrades();
+        setGrades(all);
+      }
       setLoading(false);
     };
     load();
-  }, []);
+  }, [gradeId]);
 
   const handleSort = (field) => {
     const isAsc = orderBy === field && orderDirection === "asc";
@@ -45,38 +49,33 @@ export default function GradesForm() {
     setOrderBy(field);
   };
 
-  const graded = courses.filter(
-    (c) =>
-      c.grades &&
-      c.grades.examGrade !== "" &&
-      c.grades.assignmentGrade !== "" &&
-      c.grades.finalAverage !== ""
+  const valid = grades.filter(
+    (g) =>
+      g.examGrade !== "" &&
+      g.assignmentGrade !== "" &&
+      g.finalAverage !== ""
   );
 
-  const filtered = graded.filter(
-    (c) =>
-      c.courseName.toLowerCase().includes(searchTerm.toLowerCase()) ||
-      c.grades.examGrade.toString().includes(searchTerm) ||
-      c.grades.assignmentGrade.toString().includes(searchTerm) ||
-      c.grades.finalAverage.toString().includes(searchTerm)
+  const filtered = valid.filter((g) =>
+    gradeId
+      ? true
+      : (
+          g.courseName.toLowerCase().includes(searchTerm.toLowerCase()) ||
+          g.examGrade.toString().includes(searchTerm) ||
+          g.assignmentGrade.toString().includes(searchTerm) ||
+          g.finalAverage.toString().includes(searchTerm)
+        )
   );
 
   const sorted = [...filtered].sort((a, b) => {
     const aVal =
-      orderBy === "courseName" ? a.courseName.toLowerCase() : a.grades[orderBy];
+      orderBy === "courseName" ? a.courseName.toLowerCase() : a[orderBy];
     const bVal =
-      orderBy === "courseName" ? b.courseName.toLowerCase() : b.grades[orderBy];
+      orderBy === "courseName" ? b.courseName.toLowerCase() : b[orderBy];
     if (aVal < bVal) return orderDirection === "asc" ? -1 : 1;
     if (aVal > bVal) return orderDirection === "asc" ? 1 : -1;
     return 0;
   });
-
-  const columns = [
-    { id: "courseName", label: "Course Name" },
-    { id: "examGrade", label: "Exam Grade" },
-    { id: "assignmentGrade", label: "Assignment Grade" },
-    { id: "finalAverage", label: "Final Average" },
-  ];
 
   return (
     <div>
@@ -84,42 +83,50 @@ export default function GradesForm() {
         variant="h4"
         sx={{
           textAlign: "center",
-          color: "#000",
           fontFamily: "Assistant",
           fontWeight: "bold",
           mb: 3,
         }}
       >
-        Grades Viewer
+        {gradeId ? "Grade Details" : "Grades Viewer"}
       </Typography>
-      <TextField
-        label="Search Course / Grades"
-        variant="outlined"
-        size="small"
-        fullWidth
-        sx={{ mb: 2 }}
-        value={searchTerm}
-        onChange={(e) => setSearchTerm(e.target.value)}
-      />
+
+      {!gradeId && (
+        <TextField
+          label="Search Course / Grades"
+          variant="outlined"
+          size="small"
+          fullWidth
+          sx={{ mb: 2 }}
+          value={searchTerm}
+          onChange={(e) => setSearchTerm(e.target.value)}
+        />
+      )}
+
       {loading ? (
-        <div style={{ textAlign: "center", marginTop: 40 }}>
+        <Box sx={{ textAlign: "center", mt: 4 }}>
           <CircularProgress />
-        </div>
+        </Box>
       ) : sorted.length === 0 ? (
         <Typography variant="body1" sx={{ textAlign: "center", mt: 4 }}>
-          No grades to display.
+          {gradeId ? "Grade not found." : "No grades to display."}
         </Typography>
       ) : (
         <TableContainer component={Paper}>
           <Table>
             <TableHead>
               <TableRow sx={{ backgroundColor: "#eee" }}>
-                {columns.map((col) => (
+                {[
+                  { id: "courseName", label: "Course Name" },
+                  { id: "examGrade", label: "Exam Grade" },
+                  { id: "assignmentGrade", label: "Assignment Grade" },
+                  { id: "finalAverage", label: "Final Average" },
+                ].map((col) => (
                   <TableCell key={col.id}>
                     <TableSortLabel
-                      active={orderBy === col.id}
+                      active={!gradeId && orderBy === col.id}
                       direction={orderBy === col.id ? orderDirection : "asc"}
-                      onClick={() => handleSort(col.id)}
+                      onClick={() => !gradeId && handleSort(col.id)}
                     >
                       {col.label}
                     </TableSortLabel>
@@ -128,12 +135,20 @@ export default function GradesForm() {
               </TableRow>
             </TableHead>
             <TableBody>
-              {sorted.map((c, idx) => (
-                <TableRow key={idx}>
-                  <TableCell>{c.courseName}</TableCell>
-                  <TableCell>{c.grades.examGrade}</TableCell>
-                  <TableCell>{c.grades.assignmentGrade}</TableCell>
-                  <TableCell>{c.grades.finalAverage}</TableCell>
+              {sorted.map((g) => (
+                <TableRow key={g.id}>
+                  <TableCell>
+                    <Button
+                      variant="text"
+                      onClick={() => navigate(`/forms/grades/${g.id}`)}
+                      sx={{ textTransform: "none" }}
+                    >
+                      {g.courseName}
+                    </Button>
+                  </TableCell>
+                  <TableCell>{g.examGrade}</TableCell>
+                  <TableCell>{g.assignmentGrade}</TableCell>
+                  <TableCell>{g.finalAverage}</TableCell>
                 </TableRow>
               ))}
             </TableBody>

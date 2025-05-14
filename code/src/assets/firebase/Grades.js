@@ -1,6 +1,7 @@
 import {
   collection,
   getDocs,
+  getDoc,
   addDoc,
   updateDoc,
   deleteDoc,
@@ -18,7 +19,7 @@ const seedGrades = [
   { courseName: "Business Intelligence", examGrade: 88, assignmentGrade: 84, finalAverage: 86 }
 ];
 
-// הוספת ציון חדש לקולקשן "Grades"
+// הוספת ציון חדש ל-"Grades"
 export async function addGrade(grade) {
   return addDoc(collection(firestore, COL), {
     courseName: grade.courseName,
@@ -28,7 +29,7 @@ export async function addGrade(grade) {
   });
 }
 
-// שליפת כל הציונים
+// שליפת כל הציונים עם seed אם ריק
 export async function listGrades() {
   const snapshot = await getDocs(collection(firestore, COL));
   if (snapshot.empty) {
@@ -36,12 +37,16 @@ export async function listGrades() {
       await addGrade(g);
     }
     const newSnap = await getDocs(collection(firestore, COL));
-    return newSnap.docs.map(doc => ({ id: doc.id, ...doc.data() }));
+    return newSnap.docs.map(d => ({ id: d.id, ...d.data() }));
   }
-  return snapshot.docs.map(doc => ({
-    id: doc.id,
-    ...doc.data()
-  }));
+  return snapshot.docs.map(d => ({ id: d.id, ...d.data() }));
+}
+
+// שליפת ציון יחיד לפי ID
+export async function getGrade(id) {
+  const ref = doc(firestore, COL, id);
+  const snap = await getDoc(ref);
+  return snap.exists() ? { id: snap.id, ...snap.data() } : null;
 }
 
 // עדכון ציון לפי ID
