@@ -15,7 +15,6 @@ import {
   CircularProgress,
   Snackbar,
   Alert,
-  LinearProgress,
 } from "@mui/material";
 import {
   listCourses,
@@ -27,7 +26,6 @@ import {
 export default function CoursesManagement() {
   const [courses, setCourses] = useState([]);
   const [loading, setLoading] = useState(true);
-  const [isEditMode, setIsEditMode] = useState(false);
   const [newCourse, setNewCourse] = useState({
     courseName: "",
     lecturer: "",
@@ -53,21 +51,21 @@ export default function CoursesManagement() {
     { courseName: "System Analysis", lecturer: "Dr. Ziv", year: 2025, semester: "Summer", nextClass: new Date().toISOString(), nextAssignment: new Date().toISOString(), grades: { finalAverage: 86 } },
   ];
 
+  // Load and seed if empty
   useEffect(() => {
-    const fetchData = async () => {
+    async function fetchData() {
       setLoading(true);
       const all = await listCourses();
       if (all.length === 0) {
         for (let c of seedCourses) {
           await addCourses(c);
         }
-        const seeded = await listCourses();
-        setCourses(seeded);
+        setCourses(await listCourses());
       } else {
         setCourses(all);
       }
       setLoading(false);
-    };
+    }
     fetchData();
   }, []);
 
@@ -101,50 +99,43 @@ export default function CoursesManagement() {
         await addCourses(newCourse);
         setMessage("Course added");
       }
-      const updated = await listCourses();
-      setCourses(updated);
+      setCourses(await listCourses());
       setEditId(null);
-      setIsEditMode(false);
       setNewCourse({
         courseName: "",
         lecturer: "",
         year: new Date().getFullYear(),
         semester: "A",
-        nextClass: new Date().toISOString().slice(0, 16),
-        nextAssignment: new Date().toISOString().slice(0, 16),
+        nextClass: new Date().toISOString().slice(0,16),
+        nextAssignment: new Date().toISOString().slice(0,16),
         grades: { finalAverage: "" },
       });
-    } catch (err) {
-      console.error(err);
+    } catch {
       setMessage("Error saving course");
     }
     setLoading(false);
   };
 
   const handleEdit = (course) => {
-    setLoading(true);
-    setIsEditMode(true);
     setEditId(course.id);
-
-    setTimeout(() => {
-      setNewCourse({
-        ...course,
-        nextClass: course.nextClass.slice(0, 16),
-        nextAssignment: course.nextAssignment.slice(0, 16),
-      });
-      setLoading(false);
-    }, 500); // סימולציה של "טעינת" נתונים
+    setNewCourse({
+      courseName: course.courseName,
+      lecturer: course.lecturer,
+      year: course.year,
+      semester: course.semester,
+      nextClass: course.nextClass.slice(0,16),
+      nextAssignment: course.nextAssignment.slice(0,16),
+      grades: { finalAverage: course.grades?.finalAverage?.toString() ?? "" },
+    });
   };
 
   const handleDelete = async (id) => {
     setLoading(true);
     try {
       await deleteCourse(id);
-      const updated = await listCourses();
-      setCourses(updated);
+      setCourses(await listCourses());
       setMessage("Course deleted");
-    } catch (err) {
-      console.error(err);
+    } catch {
       setMessage("Error deleting course");
     }
     setLoading(false);
@@ -165,38 +156,44 @@ export default function CoursesManagement() {
           <MenuItem value="B">B</MenuItem>
           <MenuItem value="Summer">Summer</MenuItem>
         </TextField>
-        <TextField label="Next Class" name="nextClass" type="datetime-local" value={newCourse.nextClass} onChange={handleChange} InputLabelProps={{ shrink: true }} />
-        <TextField label="Next Assignment" name="nextAssignment" type="datetime-local" value={newCourse.nextAssignment} onChange={handleChange} InputLabelProps={{ shrink: true }} />
-        <TextField label="Final Average" name="finalAverage" type="number" value={newCourse.grades.finalAverage} onChange={handleChange} sx={{ width: 140 }} />
-
+        <TextField
+          label="Next Class" name="nextClass"
+          type="datetime-local" value={newCourse.nextClass}
+          onChange={handleChange} InputLabelProps={{ shrink: true }}
+        />
+        <TextField
+          label="Next Assignment" name="nextAssignment"
+          type="datetime-local" value={newCourse.nextAssignment}
+          onChange={handleChange} InputLabelProps={{ shrink: true }}
+        />
+        <TextField
+          label="Final Average" name="finalAverage"
+          type="number" value={newCourse.grades.finalAverage}
+          onChange={handleChange} sx={{ width: 140 }}
+        />
         <Button
           variant="contained"
           onClick={handleSubmit}
-          sx={{ backgroundColor: '#7FC243', alignSelf: 'center', height: 40 }}
           disabled={loading}
+          sx={{ backgroundColor: '#7FC243', alignSelf: 'center', height: 40 }}
         >
-          {loading ? <CircularProgress size={24} color="inherit" /> : (isEditMode ? 'Update' : 'Add')}
+          {editId ? 'Update' : 'Add'}
         </Button>
       </Box>
 
-      {loading && (
-        <Box sx={{ width: '100%', mt: 2 }}>
-          <LinearProgress />
-        </Box>
-      )}
-
-      {!loading && (
+      {loading ? (
+        <Box sx={{ textAlign: 'center', mt: 4 }}><CircularProgress /></Box>
+      ) : (
         <TableContainer component={Paper}>
           <Table>
             <TableHead sx={{ backgroundColor: '#eafaf1' }}>
               <TableRow>
-                {['Name', 'Lecturer', 'Year', 'Semester', 'Next Class', 'Next Assignment', 'Avg', 'Actions'].map((h) => (
-                  <TableCell key={h} sx={{ fontFamily: 'Assistant', fontWeight: 'bold' }}>{h}</TableCell>
-                ))}
+                {['Name', 'Lecturer', 'Year', 'Semester', 'Next Class', 'Next Assignment', 'Avg', 'Actions']
+                  .map(h => <TableCell key={h} sx={{ fontFamily: 'Assistant', fontWeight: 'bold' }}>{h}</TableCell>)}
               </TableRow>
             </TableHead>
             <TableBody>
-              {courses.map((c) => (
+              {courses.map(c => (
                 <TableRow key={c.id}>
                   <TableCell>{c.courseName}</TableCell>
                   <TableCell>{c.lecturer}</TableCell>
@@ -204,7 +201,7 @@ export default function CoursesManagement() {
                   <TableCell>{c.semester}</TableCell>
                   <TableCell>{new Date(c.nextClass).toLocaleString('en-GB', { hour12: false })}</TableCell>
                   <TableCell>{new Date(c.nextAssignment).toLocaleString('en-GB', { hour12: false })}</TableCell>
-                  <TableCell>{c.grades.finalAverage}</TableCell>
+                  <TableCell>{c.grades?.finalAverage ?? "N/A"}</TableCell>
                   <TableCell>
                     <Button size="small" onClick={() => handleEdit(c)} sx={{ mr: 1 }}>Edit</Button>
                     <Button size="small" color="error" onClick={() => handleDelete(c.id)}>Delete</Button>
