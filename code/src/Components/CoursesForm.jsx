@@ -1,4 +1,3 @@
-// src/Components/CoursesForm.jsx
 import React, { useState, useEffect } from "react";
 import {
   Box,
@@ -31,17 +30,12 @@ export default function CoursesForm() {
   useEffect(() => {
     const load = async () => {
       setLoading(true);
-      try {
-        if (courseId) {
-          const single = await getCourse(courseId);
-          setCourses(single ? [single] : []);
-        } else {
-          const all = await listCourses();
-          setCourses(all);
-        }
-      } catch (err) {
-        console.error(err);
-        setCourses([]);
+      if (courseId) {
+        const single = await getCourse(courseId);
+        setCourses(single ? [single] : []);
+      } else {
+        const all = await listCourses();
+        setCourses(all);
       }
       setLoading(false);
     };
@@ -49,9 +43,8 @@ export default function CoursesForm() {
   }, [courseId]);
 
   const handleSort = (field) => {
-    if (courseId) return; // disable sorting in detail
-    const asc = orderBy === field && orderDirection === "asc";
-    setOrderDirection(asc ? "desc" : "asc");
+    const isAsc = orderBy === field && orderDirection === "asc";
+    setOrderDirection(isAsc ? "desc" : "asc");
     setOrderBy(field);
   };
 
@@ -66,15 +59,16 @@ export default function CoursesForm() {
   );
 
   const sorted = [...filtered].sort((a, b) => {
-    if (courseId) return 0;
-    if (a[orderBy] < b[orderBy]) return orderDirection === "asc" ? -1 : 1;
-    if (a[orderBy] > b[orderBy]) return orderDirection === "asc" ? 1 : -1;
+    const aVal = orderBy === "courseName" ? a.courseName.toLowerCase() : a[orderBy];
+    const bVal = orderBy === "courseName" ? b.courseName.toLowerCase() : b[orderBy];
+    if (aVal < bVal) return orderDirection === "asc" ? -1 : 1;
+    if (aVal > bVal) return orderDirection === "asc" ? 1 : -1;
     return 0;
   });
 
-  const fmt = (d) => {
-    const date = new Date(d);
-    return isNaN(date) ? "" : date.toLocaleString("en-GB", { hour12: false });
+  const formatDate = (date) => {
+    const d = new Date(date);
+    return isNaN(d.getTime()) ? "" : d.toLocaleString("en-GB", { hour12: false });
   };
 
   return (
@@ -109,26 +103,24 @@ export default function CoursesForm() {
       ) : (
         <TableContainer component={Paper}>
           <Table>
-            <TableHead sx={{ backgroundColor: "#eee" }}>
-              <TableRow>
+            <TableHead>
+              <TableRow sx={{ backgroundColor: "#eee" }}>
                 {[
-                  "courseName",
-                  "lecturer",
-                  "year",
-                  "semester",
-                  "nextClass",
-                  "nextAssignment",
-                  "finalAverage",
+                  { id: "courseName", label: "Course Name" },
+                  { id: "lecturer", label: "Lecturer" },
+                  { id: "year", label: "Year" },
+                  { id: "semester", label: "Semester" },
+                  { id: "nextClass", label: "Next Class" },
+                  { id: "nextAssignment", label: "Next Assignment" },
+                  { id: "finalAverage", label: "Final Average" },
                 ].map((col) => (
-                  <TableCell key={col}>
+                  <TableCell key={col.id}>
                     <TableSortLabel
-                      active={!courseId && orderBy === col}
-                      direction={orderBy === col ? orderDirection : "asc"}
-                      onClick={() => handleSort(col)}
+                      active={!courseId && orderBy === col.id}
+                      direction={orderBy === col.id ? orderDirection : "asc"}
+                      onClick={() => !courseId && handleSort(col.id)}
                     >
-                      {col === "finalAverage"
-                        ? "Final Average"
-                        : col.replace(/([A-Z])/g, " $1").replace(/^./, str => str.toUpperCase())}
+                      {col.label}
                     </TableSortLabel>
                   </TableCell>
                 ))}
@@ -149,8 +141,8 @@ export default function CoursesForm() {
                   <TableCell>{c.lecturer}</TableCell>
                   <TableCell>{c.year}</TableCell>
                   <TableCell>{c.semester}</TableCell>
-                  <TableCell>{fmt(c.nextClass)}</TableCell>
-                  <TableCell>{fmt(c.nextAssignment)}</TableCell>
+                  <TableCell>{formatDate(c.nextClass)}</TableCell>
+                  <TableCell>{formatDate(c.nextAssignment)}</TableCell>
                   <TableCell>{c.grades?.finalAverage ?? "N/A"}</TableCell>
                 </TableRow>
               ))}
