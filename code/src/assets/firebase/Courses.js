@@ -1,4 +1,3 @@
-// src/assets/firebase/Courses.js
 import {
   addDoc,
   collection,
@@ -10,14 +9,56 @@ import {
 } from "firebase/firestore";
 import { firestore } from "./config";
 
+// שם הקולקשן
 const COL = "Courses";
 
+// קורסים התחלתיים
 const seedCourses = [
-  { courseName: "Database Systems", lecturer: "Dr. Cohen", year: 2025, semester: "A", nextClass: new Date().toISOString(), nextAssignment: new Date().toISOString(), grades: { finalAverage: 85 } },
-  { courseName: "Network Fundamentals", lecturer: "Prof. Levy", year: 2025, semester: "B", nextClass: new Date().toISOString(), nextAssignment: new Date().toISOString(), grades: { finalAverage: 78 } },
-  { courseName: "Information Security", lecturer: "Dr. Bar", year: 2025, semester: "A", nextClass: new Date().toISOString(), nextAssignment: new Date().toISOString(), grades: { finalAverage: 90 } },
-  { courseName: "Web Development", lecturer: "Ms. Mor", year: 2025, semester: "B", nextClass: new Date().toISOString(), nextAssignment: new Date().toISOString(), grades: { finalAverage: 88 } },
-  { courseName: "ERP Systems", lecturer: "Mr. Yaron", year: 2025, semester: "Summer", nextClass: new Date().toISOString(), nextAssignment: new Date().toISOString(), grades: { finalAverage: 82 } }
+  {
+    courseName: "Database Systems",
+    lecturer: "Dr. Cohen",
+    year: 2025,
+    semester: "A",
+    nextClass: new Date().toISOString(),
+    nextAssignment: new Date().toISOString(),
+    grades: { finalAverage: 85 }
+  },
+  {
+    courseName: "Network Fundamentals",
+    lecturer: "Prof. Levy",
+    year: 2025,
+    semester: "B",
+    nextClass: new Date().toISOString(),
+    nextAssignment: new Date().toISOString(),
+    grades: { finalAverage: 78 }
+  },
+  {
+    courseName: "Information Security",
+    lecturer: "Dr. Bar",
+    year: 2025,
+    semester: "A",
+    nextClass: new Date().toISOString(),
+    nextAssignment: new Date().toISOString(),
+    grades: { finalAverage: 90 }
+  },
+  {
+    courseName: "Web Development",
+    lecturer: "Ms. Mor",
+    year: 2025,
+    semester: "B",
+    nextClass: new Date().toISOString(),
+    nextAssignment: new Date().toISOString(),
+    grades: { finalAverage: 88 }
+  },
+  {
+    courseName: "ERP Systems",
+    lecturer: "Mr. Yaron",
+    year: 2025,
+    semester: "Summer",
+    nextClass: new Date().toISOString(),
+    nextAssignment: new Date().toISOString(),
+    grades: { finalAverage: 82 }
+  }
 ];
 
 // הוספת קורס חדש
@@ -35,7 +76,7 @@ export async function addCourses(course) {
   });
 }
 
-// טעינת כל הקורסים
+// שליפת כל הקורסים
 export async function listCourses() {
   const snapshot = await getDocs(collection(firestore, COL));
   if (snapshot.empty) {
@@ -51,17 +92,17 @@ export async function listCourses() {
   }));
 }
 
-// שליפת קורס יחיד לפי ID
+// שליפת קורס לפי ID
 export async function getCourse(courseId) {
   const courseRef = doc(firestore, COL, courseId);
   const snap = await getDoc(courseRef);
   return snap.exists() ? { id: snap.id, ...snap.data() } : null;
 }
 
-// עדכון קורס לפי ID
-export async function updateCourse(courseId, newData) {
-  const courseRef = doc(firestore, COL, courseId);
-  return updateDoc(courseRef, newData);
+// עדכון קורס לפי ID (מתוקן!)
+export async function updateCourse(id, courseData) {
+  const courseRef = doc(firestore, COL, id);
+  return updateDoc(courseRef, courseData);
 }
 
 // מחיקת קורס לפי ID

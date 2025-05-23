@@ -1,3 +1,4 @@
+// src/Components/CoursesManagement.jsx
 import React, { useState, useEffect } from "react";
 import {
   Box,
@@ -51,7 +52,6 @@ export default function CoursesManagement() {
     { courseName: "System Analysis", lecturer: "Dr. Ziv", year: 2025, semester: "Summer", nextClass: new Date().toISOString(), nextAssignment: new Date().toISOString(), grades: { finalAverage: 86 } },
   ];
 
-  // Load and seed if empty
   useEffect(() => {
     async function fetchData() {
       setLoading(true);
@@ -81,7 +81,8 @@ export default function CoursesManagement() {
     }
   };
 
-  const handleSubmit = async () => {
+  const handleSubmit = async (e) => {
+    e.preventDefault();
     setLoading(true);
     try {
       if (editId) {
@@ -106,8 +107,8 @@ export default function CoursesManagement() {
         lecturer: "",
         year: new Date().getFullYear(),
         semester: "A",
-        nextClass: new Date().toISOString().slice(0,16),
-        nextAssignment: new Date().toISOString().slice(0,16),
+        nextClass: new Date().toISOString().slice(0, 16),
+        nextAssignment: new Date().toISOString().slice(0, 16),
         grades: { finalAverage: "" },
       });
     } catch {
@@ -123,8 +124,8 @@ export default function CoursesManagement() {
       lecturer: course.lecturer,
       year: course.year,
       semester: course.semester,
-      nextClass: course.nextClass.slice(0,16),
-      nextAssignment: course.nextAssignment.slice(0,16),
+      nextClass: course.nextClass.slice(0, 16),
+      nextAssignment: course.nextAssignment.slice(0, 16),
       grades: { finalAverage: course.grades?.finalAverage?.toString() ?? "" },
     });
   };
@@ -147,33 +148,70 @@ export default function CoursesManagement() {
         Courses Management
       </Typography>
 
-      <Box sx={{ display: 'flex', flexWrap: 'wrap', gap: 2, mb: 2 }}>
-        <TextField label="Course Name" name="courseName" value={newCourse.courseName} onChange={handleChange} />
-        <TextField label="Lecturer" name="lecturer" value={newCourse.lecturer} onChange={handleChange} />
-        <TextField label="Year" name="year" type="number" value={newCourse.year} onChange={handleChange} sx={{ width: 100 }} />
-        <TextField select label="Semester" name="semester" value={newCourse.semester} onChange={handleChange} sx={{ width: 120 }}>
+      <Box
+        component="form"
+        onSubmit={handleSubmit}
+        sx={{ display: 'flex', flexWrap: 'wrap', gap: 2, mb: 2 }}
+      >
+        <TextField
+          label="Course Name"
+          name="courseName"
+          value={newCourse.courseName}
+          onChange={handleChange}
+        />
+        <TextField
+          label="Lecturer"
+          name="lecturer"
+          value={newCourse.lecturer}
+          onChange={handleChange}
+        />
+        <TextField
+          label="Year"
+          name="year"
+          type="number"
+          value={newCourse.year}
+          onChange={handleChange}
+          sx={{ width: 100 }}
+        />
+        <TextField
+          select
+          label="Semester"
+          name="semester"
+          value={newCourse.semester}
+          onChange={handleChange}
+          sx={{ width: 120 }}
+        >
           <MenuItem value="A">A</MenuItem>
           <MenuItem value="B">B</MenuItem>
           <MenuItem value="Summer">Summer</MenuItem>
         </TextField>
         <TextField
-          label="Next Class" name="nextClass"
-          type="datetime-local" value={newCourse.nextClass}
-          onChange={handleChange} InputLabelProps={{ shrink: true }}
+          label="Next Class"
+          name="nextClass"
+          type="datetime-local"
+          value={newCourse.nextClass}
+          onChange={handleChange}
+          InputLabelProps={{ shrink: true }}
         />
         <TextField
-          label="Next Assignment" name="nextAssignment"
-          type="datetime-local" value={newCourse.nextAssignment}
-          onChange={handleChange} InputLabelProps={{ shrink: true }}
+          label="Next Assignment"
+          name="nextAssignment"
+          type="datetime-local"
+          value={newCourse.nextAssignment}
+          onChange={handleChange}
+          InputLabelProps={{ shrink: true }}
         />
         <TextField
-          label="Final Average" name="finalAverage"
-          type="number" value={newCourse.grades.finalAverage}
-          onChange={handleChange} sx={{ width: 140 }}
+          label="Final Average"
+          name="finalAverage"
+          type="number"
+          value={newCourse.grades.finalAverage}
+          onChange={handleChange}
+          sx={{ width: 140 }}
         />
         <Button
+          type="submit"
           variant="contained"
-          onClick={handleSubmit}
           disabled={loading}
           sx={{ backgroundColor: '#7FC243', alignSelf: 'center', height: 40 }}
         >
@@ -182,14 +220,17 @@ export default function CoursesManagement() {
       </Box>
 
       {loading ? (
-        <Box sx={{ textAlign: 'center', mt: 4 }}><CircularProgress /></Box>
+        <Box sx={{ textAlign: 'center', mt: 4 }}>
+          <CircularProgress />
+        </Box>
       ) : (
         <TableContainer component={Paper}>
           <Table>
             <TableHead sx={{ backgroundColor: '#eafaf1' }}>
               <TableRow>
-                {['Name', 'Lecturer', 'Year', 'Semester', 'Next Class', 'Next Assignment', 'Avg', 'Actions']
-                  .map(h => <TableCell key={h} sx={{ fontFamily: 'Assistant', fontWeight: 'bold' }}>{h}</TableCell>)}
+                {["Name","Lecturer","Year","Semester","Next Class","Next Assignment","Avg","Actions"].map(h => (
+                  <TableCell key={h} sx={{ fontFamily:'Assistant', fontWeight:'bold' }}>{h}</TableCell>
+                ))}
               </TableRow>
             </TableHead>
             <TableBody>
@@ -199,12 +240,20 @@ export default function CoursesManagement() {
                   <TableCell>{c.lecturer}</TableCell>
                   <TableCell>{c.year}</TableCell>
                   <TableCell>{c.semester}</TableCell>
-                  <TableCell>{new Date(c.nextClass).toLocaleString('en-GB', { hour12: false })}</TableCell>
-                  <TableCell>{new Date(c.nextAssignment).toLocaleString('en-GB', { hour12: false })}</TableCell>
+                  <TableCell>
+                    {new Date(c.nextClass).toLocaleString('en-GB', { hour12: false })}
+                  </TableCell>
+                  <TableCell>
+                    {new Date(c.nextAssignment).toLocaleString('en-GB', { hour12: false })}
+                  </TableCell>
                   <TableCell>{c.grades?.finalAverage ?? "N/A"}</TableCell>
                   <TableCell>
-                    <Button size="small" onClick={() => handleEdit(c)} sx={{ mr: 1 }}>Edit</Button>
-                    <Button size="small" color="error" onClick={() => handleDelete(c.id)}>Delete</Button>
+                    <Button size="small" onClick={() => handleEdit(c)} sx={{ mr: 1 }}>
+                      Edit
+                    </Button>
+                    <Button size="small" color="error" onClick={() => handleDelete(c.id)}>
+                      Delete
+                    </Button>
                   </TableCell>
                 </TableRow>
               ))}

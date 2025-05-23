@@ -2,7 +2,6 @@ import React, { useState, useEffect } from "react";
 import {
   Box,
   Typography,
-  TextField,
   Table,
   TableBody,
   TableCell,
@@ -10,146 +9,89 @@ import {
   TableHead,
   TableRow,
   Paper,
-  TableSortLabel,
+  Divider,
   CircularProgress,
-  Button,
 } from "@mui/material";
-import { useNavigate, useParams } from "react-router-dom";
-import { listCourses, getCourse } from "../assets/firebase/Courses";
+import { useParams } from "react-router-dom";
+import { getCourse } from "../assets/firebase/Courses";
 
 export default function CoursesForm() {
-  const [courses, setCourses] = useState([]);
-  const [loading, setLoading] = useState(true);
-  const [searchTerm, setSearchTerm] = useState("");
-  const [orderBy, setOrderBy] = useState("courseName");
-  const [orderDirection, setOrderDirection] = useState("asc");
-
-  const navigate = useNavigate();
   const { courseId } = useParams();
+  const [course, setCourse] = useState(null);
+  const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    const load = async () => {
-      setLoading(true);
-      if (courseId) {
-        const single = await getCourse(courseId);
-        setCourses(single ? [single] : []);
-      } else {
-        const all = await listCourses();
-        setCourses(all);
-      }
-      setLoading(false);
-    };
-    load();
+    getCourse(courseId)
+      .then(data => setCourse(data))
+      .catch(console.error)
+      .finally(() => setLoading(false));
   }, [courseId]);
 
-  const handleSort = (field) => {
-    const isAsc = orderBy === field && orderDirection === "asc";
-    setOrderDirection(isAsc ? "desc" : "asc");
-    setOrderBy(field);
-  };
+  if (loading) {
+    return (
+      <Box sx={{ display: "flex", justifyContent: "center", mt: 4 }}>
+        <CircularProgress />
+      </Box>
+    );
+  }
 
-  const filtered = courses.filter((c) =>
-    courseId
-      ? true
-      : (
-          c.courseName.toLowerCase().includes(searchTerm.toLowerCase()) ||
-          c.lecturer.toLowerCase().includes(searchTerm.toLowerCase()) ||
-          c.year.toString().includes(searchTerm)
-        )
-  );
+  if (!course) {
+    return (
+      <Typography variant="h6" align="center" sx={{ mt: 4 }}>
+        Course not found.
+      </Typography>
+    );
+  }
 
-  const sorted = [...filtered].sort((a, b) => {
-    const aVal = orderBy === "courseName" ? a.courseName.toLowerCase() : a[orderBy];
-    const bVal = orderBy === "courseName" ? b.courseName.toLowerCase() : b[orderBy];
-    if (aVal < bVal) return orderDirection === "asc" ? -1 : 1;
-    if (aVal > bVal) return orderDirection === "asc" ? 1 : -1;
-    return 0;
-  });
-
-  const formatDate = (date) => {
-    const d = new Date(date);
-    return isNaN(d.getTime()) ? "" : d.toLocaleString("en-GB", { hour12: false });
-  };
+  const fmt = date =>
+    new Date(date).toLocaleString("en-GB", { hour12: false });
 
   return (
-    <Box>
+    <Box sx={{ maxWidth: 960, mx: "auto", mt: 4, px: 2 }}>
       <Typography
         variant="h4"
-        sx={{ textAlign: "center", mb: 3, fontFamily: "Assistant", fontWeight: "bold" }}
+        align="center"
+        gutterBottom
+        sx={{ fontFamily: "Assistant", fontWeight: "bold" }}
       >
-        {courseId ? "Course Details" : "Courses Viewer"}
+        Course Details
       </Typography>
 
-      {!courseId && (
-        <TextField
-          label="Search Course / Lecturer / Year"
-          variant="outlined"
-          size="small"
-          fullWidth
-          sx={{ mb: 2 }}
-          value={searchTerm}
-          onChange={(e) => setSearchTerm(e.target.value)}
-        />
-      )}
-
-      {loading ? (
-        <Box sx={{ textAlign: "center", mt: 4 }}>
-          <CircularProgress />
-        </Box>
-      ) : sorted.length === 0 ? (
-        <Typography variant="body1" sx={{ textAlign: "center", mt: 4 }}>
-          {courseId ? "Course not found." : "No courses to display."}
-        </Typography>
-      ) : (
-        <TableContainer component={Paper}>
-          <Table>
-            <TableHead>
-              <TableRow sx={{ backgroundColor: "#eee" }}>
-                {[
-                  { id: "courseName", label: "Course Name" },
-                  { id: "lecturer", label: "Lecturer" },
-                  { id: "year", label: "Year" },
-                  { id: "semester", label: "Semester" },
-                  { id: "nextClass", label: "Next Class" },
-                  { id: "nextAssignment", label: "Next Assignment" },
-                  { id: "finalAverage", label: "Final Average" },
-                ].map((col) => (
-                  <TableCell key={col.id}>
-                    <TableSortLabel
-                      active={!courseId && orderBy === col.id}
-                      direction={orderBy === col.id ? orderDirection : "asc"}
-                      onClick={() => !courseId && handleSort(col.id)}
-                    >
-                      {col.label}
-                    </TableSortLabel>
-                  </TableCell>
-                ))}
-              </TableRow>
-            </TableHead>
-            <TableBody>
-              {sorted.map((c) => (
-                <TableRow key={c.id}>
-                  <TableCell>
-                    <Button
-                      variant="text"
-                      onClick={() => navigate(`/forms/courses/${c.id}`)}
-                      sx={{ textTransform: "none" }}
-                    >
-                      {c.courseName}
-                    </Button>
-                  </TableCell>
-                  <TableCell>{c.lecturer}</TableCell>
-                  <TableCell>{c.year}</TableCell>
-                  <TableCell>{c.semester}</TableCell>
-                  <TableCell>{formatDate(c.nextClass)}</TableCell>
-                  <TableCell>{formatDate(c.nextAssignment)}</TableCell>
-                  <TableCell>{c.grades?.finalAverage ?? "N/A"}</TableCell>
-                </TableRow>
+      <TableContainer component={Paper}>
+        <Table aria-label="course details">
+          <TableHead>
+            <TableRow sx={{ backgroundColor: "#eafaf1" }}>
+              {[
+                "Course Name",
+                "Lecturer",
+                "Year",
+                "Semester",
+                "Next Class",
+                "Next Assignment",
+                "Final Average",
+              ].map(h => (
+                <TableCell
+                  key={h}
+                  sx={{ fontFamily: "Assistant", fontWeight: "bold" }}
+                >
+                  {h}
+                </TableCell>
               ))}
-            </TableBody>
-          </Table>
-        </TableContainer>
-      )}
+            </TableRow>
+          </TableHead>
+          <TableBody>
+            <TableRow>
+              <TableCell>{course.courseName}</TableCell>
+              <TableCell>{course.lecturer}</TableCell>
+              <TableCell>{course.year}</TableCell>
+              <TableCell>{course.semester}</TableCell>
+              <TableCell>{fmt(course.nextClass)}</TableCell>
+              <TableCell>{fmt(course.nextAssignment)}</TableCell>
+              <TableCell>{course.grades?.finalAverage ?? "N/A"}</TableCell>
+            </TableRow>
+          </TableBody>
+        </Table>
+      </TableContainer>
     </Box>
   );
 }
