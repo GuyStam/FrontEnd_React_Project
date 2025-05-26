@@ -9,7 +9,6 @@ import {
   TableHead,
   TableRow,
   Paper,
-  Divider,
   CircularProgress,
 } from "@mui/material";
 import { useParams } from "react-router-dom";
@@ -38,13 +37,13 @@ export default function CoursesForm() {
   if (!course) {
     return (
       <Typography variant="h6" align="center" sx={{ mt: 4 }}>
-        Course not found.
+        הקורס לא נמצא.
       </Typography>
     );
   }
 
   const fmt = date =>
-    new Date(date).toLocaleString("en-GB", { hour12: false });
+    new Date(date).toLocaleString("he-IL", { hour12: false });
 
   return (
     <Box sx={{ maxWidth: 960, mx: "auto", mt: 4, px: 2 }}>
@@ -54,21 +53,21 @@ export default function CoursesForm() {
         gutterBottom
         sx={{ fontFamily: "Assistant", fontWeight: "bold" }}
       >
-        Course Details
+        פרטי קורס
       </Typography>
 
       <TableContainer component={Paper}>
-        <Table aria-label="course details">
+        <Table>
           <TableHead>
-            <TableRow sx={{ backgroundColor: "#eafaf1" }}>
+            <TableRow sx={{ backgroundColor: "#f0f0f0" }}>
               {[
-                "Course Name",
-                "Lecturer",
-                "Year",
-                "Semester",
-                "Next Class",
-                "Next Assignment",
-                "Final Average",
+                "שם קורס",
+                "מרצה",
+                "שנה",
+                "סמסטר",
+                "שיעור הבא",
+                "הגשה הבאה",
+                "ממוצע סופי",
               ].map(h => (
                 <TableCell
                   key={h}

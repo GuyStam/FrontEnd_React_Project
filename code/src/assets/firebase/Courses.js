@@ -9,7 +9,6 @@ import {
 } from "firebase/firestore";
 import { firestore } from "./config";
 
-// שם הקולקשן
 const COL = "Courses";
 
 // קורסים התחלתיים
@@ -62,18 +61,19 @@ const seedCourses = [
 ];
 
 // הוספת קורס חדש
-export async function addCourses(course) {
-  return addDoc(collection(firestore, COL), {
+export async function addCourse(course) {
+  const docRef = await addDoc(collection(firestore, COL), {
     courseName: course.courseName,
     lecturer: course.lecturer,
     year: Number(course.year),
     semester: course.semester,
-    nextClass: course.nextClass,
-    nextAssignment: course.nextAssignment,
+    nextClass: course.nextClass ?? new Date().toISOString(),
+    nextAssignment: course.nextAssignment ?? new Date().toISOString(),
     grades: {
-      finalAverage: Number(course.grades.finalAverage)
+      finalAverage: Number(course.grades?.finalAverage ?? 0)
     }
   });
+  return docRef.id;
 }
 
 // שליפת כל הקורסים
@@ -81,7 +81,7 @@ export async function listCourses() {
   const snapshot = await getDocs(collection(firestore, COL));
   if (snapshot.empty) {
     for (let c of seedCourses) {
-      await addCourses(c);
+      await addCourse(c);
     }
     const newSnap = await getDocs(collection(firestore, COL));
     return newSnap.docs.map(doc => ({ id: doc.id, ...doc.data() }));
@@ -99,13 +99,13 @@ export async function getCourse(courseId) {
   return snap.exists() ? { id: snap.id, ...snap.data() } : null;
 }
 
-// עדכון קורס לפי ID (מתוקן!)
+// עדכון קורס
 export async function updateCourse(id, courseData) {
   const courseRef = doc(firestore, COL, id);
   return updateDoc(courseRef, courseData);
 }
 
-// מחיקת קורס לפי ID
+// מחיקת קורס
 export async function deleteCourse(courseId) {
   const courseRef = doc(firestore, COL, courseId);
   return deleteDoc(courseRef);

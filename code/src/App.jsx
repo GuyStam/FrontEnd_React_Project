@@ -7,9 +7,10 @@ import Header from "./Header";
 import HomePage from "./HomePage";
 import HomeCards from "./Components/HomeCards";
 import Forms from "./Components/Forms";
-import CoursesList from "./Components/CoursesList";
 import CoursesForm from "./Components/CoursesForm";
 import GradeForm from "./Components/GradeForm";
+import CoursesTable from "./Components/CoursesTable";
+import GradesTable from "./Components/GradesTable";
 import Management from "./Components/Management";
 import CoursesManagement from "./Components/CoursesManagement";
 import GradesManagement from "./Components/GradesManagement";
@@ -29,18 +30,20 @@ export default function App() {
           {/* Generic Forms landing */}
           <Route path="/forms" element={<Forms />} />
 
-          {/* Courses list / detail */}
-          <Route path="/forms/courses" element={<CoursesList />} />
+          {/* Courses view */}
+          <Route path="/forms/courses" element={<CoursesTable />} />
           <Route path="/forms/courses/:courseId" element={<CoursesForm />} />
 
-          {/* Grades form */}
-          <Route path="/forms/grades" element={<GradeForm />} />
+          {/* Grades view */}
+          <Route path="/forms/grades" element={<GradesTable />} />
           <Route path="/forms/grades/:gradeId" element={<GradeForm />} />
 
           {/* Management modules */}
           <Route path="/management" element={<Management />} />
-          <Route path="/management/courses" element={<CoursesManagement />} />
-          <Route path="/management/grades" element={<GradesManagement />} />
+          <Route path="/management/courses" element={<CoursesTable />} />
+          <Route path="/management/courses/:courseId" element={<CoursesManagement />} />
+          <Route path="/management/grades" element={<GradesTable />} />
+          <Route path="/management/grades/:gradeId" element={<GradesManagement />} />
 
           {/* Help & Info */}
           <Route path="/help" element={<Help />} />

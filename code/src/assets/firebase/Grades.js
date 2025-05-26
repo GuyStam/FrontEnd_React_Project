@@ -1,35 +1,44 @@
 import {
+  addDoc,
   collection,
   getDocs,
   getDoc,
-  addDoc,
   updateDoc,
   deleteDoc,
-  doc
+  doc,
 } from "firebase/firestore";
 import { firestore } from "./config";
 
 const COL = "Grades";
 
+// ציונים התחלתיים (לא חובה אבל שימושי)
 const seedGrades = [
-  { courseName: "Database Systems", examGrade: 85, assignmentGrade: 90, finalAverage: 88 },
-  { courseName: "Information Security", examGrade: 92, assignmentGrade: 87, finalAverage: 90 },
-  { courseName: "Project Management", examGrade: 80, assignmentGrade: 85, finalAverage: 82 },
-  { courseName: "ERP Systems", examGrade: 78, assignmentGrade: 81, finalAverage: 80 },
-  { courseName: "Business Intelligence", examGrade: 88, assignmentGrade: 84, finalAverage: 86 }
+  {
+    courseName: "Database Systems",
+    examGrade: 90,
+    assignmentGrade: 85,
+    finalAverage: 87,
+  },
+  {
+    courseName: "Network Fundamentals",
+    examGrade: 75,
+    assignmentGrade: 80,
+    finalAverage: 78,
+  },
 ];
 
-// הוספת ציון חדש ל-"Grades"
+// הוספת ציון חדש
 export async function addGrade(grade) {
-  return addDoc(collection(firestore, COL), {
+  const docRef = await addDoc(collection(firestore, COL), {
     courseName: grade.courseName,
     examGrade: Number(grade.examGrade),
     assignmentGrade: Number(grade.assignmentGrade),
     finalAverage: Number(grade.finalAverage),
   });
+  return docRef.id;
 }
 
-// שליפת כל הציונים עם seed אם ריק
+// שליפת כל הציונים
 export async function listGrades() {
   const snapshot = await getDocs(collection(firestore, COL));
   if (snapshot.empty) {
@@ -37,31 +46,29 @@ export async function listGrades() {
       await addGrade(g);
     }
     const newSnap = await getDocs(collection(firestore, COL));
-    return newSnap.docs.map(d => ({ id: d.id, ...d.data() }));
+    return newSnap.docs.map(doc => ({ id: doc.id, ...doc.data() }));
   }
-  return snapshot.docs.map(d => ({ id: d.id, ...d.data() }));
+  return snapshot.docs.map(doc => ({
+    id: doc.id,
+    ...doc.data(),
+  }));
 }
 
-// שליפת ציון יחיד לפי ID
-export async function getGrade(id) {
-  const ref = doc(firestore, COL, id);
-  const snap = await getDoc(ref);
+// שליפת ציון לפי ID
+export async function getGrade(gradeId) {
+  const gradeRef = doc(firestore, COL, gradeId);
+  const snap = await getDoc(gradeRef);
   return snap.exists() ? { id: snap.id, ...snap.data() } : null;
 }
 
 // עדכון ציון לפי ID
-export async function updateGrade(gradeId, newData) {
-  const gradeRef = doc(firestore, COL, gradeId);
-  return updateDoc(gradeRef, {
-    courseName: newData.courseName,
-    examGrade: Number(newData.examGrade),
-    assignmentGrade: Number(newData.assignmentGrade),
-    finalAverage: Number(newData.finalAverage),
-  });
+export async function updateGrade(id, gradeData) {
+  const gradeRef = doc(firestore, COL, id);
+  return updateDoc(gradeRef, gradeData);
 }
 
 // מחיקת ציון לפי ID
-export async function deleteGrade(gradeId) {
-  const gradeRef = doc(firestore, COL, gradeId);
+export async function deleteGrade(id) {
+  const gradeRef = doc(firestore, COL, id);
   return deleteDoc(gradeRef);
 }
