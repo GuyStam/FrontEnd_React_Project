@@ -37,7 +37,7 @@ export default function GradeForm() {
   if (!grade) {
     return (
       <Typography variant="h6" align="center" sx={{ mt: 4 }}>
-        הציון לא נמצא.
+        Grade not found.
       </Typography>
     );
   }
@@ -50,34 +50,25 @@ export default function GradeForm() {
         gutterBottom
         sx={{ fontFamily: "Assistant", fontWeight: "bold" }}
       >
-        פרטי ציון
+        Grade Details
       </Typography>
 
       <TableContainer component={Paper}>
         <Table>
           <TableHead>
             <TableRow sx={{ backgroundColor: "#f0f0f0" }}>
-              {[
-                "שם קורס",
-                "ציון במבחן",
-                "ציון בעבודה",
-                "ממוצע סופי",
-              ].map(h => (
-                <TableCell
-                  key={h}
-                  sx={{ fontFamily: "Assistant", fontWeight: "bold" }}
-                >
-                  {h}
-                </TableCell>
-              ))}
+              <TableCell sx={{ fontFamily: "Assistant", fontWeight: "bold" }}>Course Name</TableCell>
+              <TableCell sx={{ fontFamily: "Assistant", fontWeight: "bold" }}>Exam Grade</TableCell>
+              <TableCell sx={{ fontFamily: "Assistant", fontWeight: "bold" }}>Assignment Grade</TableCell>
+              <TableCell sx={{ fontFamily: "Assistant", fontWeight: "bold" }}>Final Average</TableCell>
             </TableRow>
           </TableHead>
           <TableBody>
             <TableRow>
               <TableCell>{grade.courseName}</TableCell>
-              <TableCell>{grade.examGrade}</TableCell>
-              <TableCell>{grade.assignmentGrade}</TableCell>
-              <TableCell>{grade.finalAverage}</TableCell>
+              <TableCell>{grade.examGrade ?? "N/A"}</TableCell>
+              <TableCell>{grade.assignmentGrade ?? "N/A"}</TableCell>
+              <TableCell>{grade.finalAverage ?? "N/A"}</TableCell>
             </TableRow>
           </TableBody>
         </Table>

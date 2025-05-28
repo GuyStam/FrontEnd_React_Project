@@ -33,9 +33,13 @@ export default function Header() {
             <Icons name="home" sx={iconStyle} />
             <Typography variant="body2" sx={textStyle}>Home</Typography>
           </Button>
-          <Button onClick={() => handleNavigate("/forms")} sx={navButtonStyle}>
-            <Icons name="forms" sx={iconStyle} />
-            <Typography variant="body2" sx={textStyle}>Forms</Typography>
+          <Button onClick={() => handleNavigate("/forms/courses")} sx={navButtonStyle}>
+            <Icons name="courses" sx={iconStyle} />
+            <Typography variant="body2" sx={textStyle}>Courses</Typography>
+          </Button>
+          <Button onClick={() => handleNavigate("/forms/grades")} sx={navButtonStyle}>
+            <Icons name="grades" sx={iconStyle} />
+            <Typography variant="body2" sx={textStyle}>Grades</Typography>
           </Button>
           <Button onClick={() => handleNavigate("/management")} sx={navButtonStyle}>
             <Icons name="management" sx={iconStyle} />

@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from "react";
+import React, { useEffect, useState, forwardRef } from "react";
 import {
   Box,
   Typography,
@@ -10,36 +10,25 @@ import {
   TableHead,
   TableRow,
   Paper,
-  Button,
   CircularProgress,
-  TableSortLabel,
-  IconButton,
+  Dialog,
+  DialogTitle,
+  DialogContent,
+  Slide,
 } from "@mui/material";
-import { useNavigate, useLocation } from "react-router-dom";
-import {
-  listGrades,
-  addGrade,
-  deleteGrade,
-} from "../assets/firebase/Grades";
-import DeleteIcon from "@mui/icons-material/Delete";
-import SaveIcon from "@mui/icons-material/Save";
+import { listGrades } from "../assets/firebase/Grades";
+
+// Slide-in transition from top
+const Transition = forwardRef(function Transition(props, ref) {
+  return <Slide direction="down" ref={ref} {...props} />;
+});
 
 export default function GradesTable() {
   const [grades, setGrades] = useState([]);
   const [loading, setLoading] = useState(true);
   const [searchTerm, setSearchTerm] = useState("");
-  const [orderBy, setOrderBy] = useState("courseName");
-  const [orderDirection, setOrderDirection] = useState("asc");
-  const [newGrade, setNewGrade] = useState({
-    courseName: "",
-    examGrade: "",
-    assignmentGrade: "",
-    finalAverage: "",
-  });
-
-  const navigate = useNavigate();
-  const location = useLocation();
-  const isManagement = location.pathname.startsWith("/management");
+  const [open, setOpen] = useState(false);
+  const [selectedGrade, setSelectedGrade] = useState(null);
 
   useEffect(() => {
     listGrades()
@@ -48,27 +37,14 @@ export default function GradesTable() {
       .finally(() => setLoading(false));
   }, []);
 
-  const handleSort = (field) => {
-    const isAsc = orderBy === field && orderDirection === "asc";
-    setOrderDirection(isAsc ? "desc" : "asc");
-    setOrderBy(field);
+  const handleOpen = (grade) => {
+    setSelectedGrade(grade);
+    setOpen(true);
   };
 
-  const handleDelete = async (id) => {
-    await deleteGrade(id);
-    setGrades((prev) => prev.filter((g) => g.id !== id));
-  };
-
-  const handleSaveNewGrade = async () => {
-    if (!newGrade.courseName || !newGrade.examGrade) return;
-    const newId = await addGrade(newGrade);
-    setGrades((prev) => [...prev, { id: newId, ...newGrade }]);
-    setNewGrade({
-      courseName: "",
-      examGrade: "",
-      assignmentGrade: "",
-      finalAverage: "",
-    });
+  const handleClose = () => {
+    setOpen(false);
+    setSelectedGrade(null);
   };
 
   const filtered = grades.filter((g) =>
@@ -78,28 +54,19 @@ export default function GradesTable() {
       .includes(searchTerm.toLowerCase())
   );
 
-  const sorted = [...filtered].sort((a, b) => {
-    const aVal =
-      typeof a[orderBy] === "string"
-        ? a[orderBy].toLowerCase()
-        : a[orderBy] ?? "";
-    const bVal =
-      typeof b[orderBy] === "string"
-        ? b[orderBy].toLowerCase()
-        : b[orderBy] ?? "";
-    if (aVal < bVal) return orderDirection === "asc" ? -1 : 1;
-    if (aVal > bVal) return orderDirection === "asc" ? 1 : -1;
-    return 0;
-  });
-
   return (
     <Box sx={{ maxWidth: 960, mx: "auto", mt: 4, px: 2 }}>
-      <Typography variant="h4" align="center" gutterBottom>
-        {isManagement ? "ניהול ציונים" : "טבלת ציונים"}
+      <Typography
+        variant="h4"
+        align="center"
+        gutterBottom
+        sx={{ fontFamily: "Assistant", fontWeight: "bold" }}
+      >
+        My Grades
       </Typography>
 
       <TextField
-        label="חיפוש כללי (Ctrl+F)"
+        label="Search"
         fullWidth
         size="small"
         sx={{ mb: 2 }}
@@ -116,119 +83,86 @@ export default function GradesTable() {
           <Table>
             <TableHead>
               <TableRow sx={{ backgroundColor: "#eee" }}>
-                {[
-                  { id: "courseName", label: "שם קורס" },
-                  { id: "examGrade", label: "מבחן" },
-                  { id: "assignmentGrade", label: "עבודה" },
-                  { id: "finalAverage", label: "ממוצע" },
-                ].map((col) => (
-                  <TableCell key={col.id}>
-                    <TableSortLabel
-                      active={orderBy === col.id}
-                      direction={orderBy === col.id ? orderDirection : "asc"}
-                      onClick={() => handleSort(col.id)}
-                    >
-                      {col.label}
-                    </TableSortLabel>
-                  </TableCell>
-                ))}
-                {isManagement && <TableCell>פעולות</TableCell>}
+                <TableCell><strong>Course Name</strong></TableCell>
+                <TableCell><strong>Exam Grade</strong></TableCell>
+                <TableCell><strong>Assignment Grade</strong></TableCell>
+                <TableCell><strong>Final Average</strong></TableCell>
               </TableRow>
             </TableHead>
             <TableBody>
-              {isManagement && (
-                <TableRow>
-                  <TableCell>
-                    <TextField
-                      size="small"
-                      value={newGrade.courseName}
-                      onChange={(e) =>
-                        setNewGrade((prev) => ({
-                          ...prev,
-                          courseName: e.target.value,
-                        }))
-                      }
-                      placeholder="שם קורס"
-                    />
+              {filtered.map((g, index) => (
+                <TableRow key={index}>
+                  <TableCell
+                    onClick={() => handleOpen(g)}
+                    sx={{
+                      color: "#7FC243",
+                      fontWeight: "bold",
+                      cursor: "pointer",
+                    }}
+                  >
+                    {g.courseName}
                   </TableCell>
-                  <TableCell>
-                    <TextField
-                      size="small"
-                      value={newGrade.examGrade}
-                      onChange={(e) =>
-                        setNewGrade((prev) => ({
-                          ...prev,
-                          examGrade: e.target.value,
-                        }))
-                      }
-                      placeholder="מבחן"
-                    />
-                  </TableCell>
-                  <TableCell>
-                    <TextField
-                      size="small"
-                      value={newGrade.assignmentGrade}
-                      onChange={(e) =>
-                        setNewGrade((prev) => ({
-                          ...prev,
-                          assignmentGrade: e.target.value,
-                        }))
-                      }
-                      placeholder="עבודה"
-                    />
-                  </TableCell>
-                  <TableCell>
-                    <TextField
-                      size="small"
-                      value={newGrade.finalAverage}
-                      onChange={(e) =>
-                        setNewGrade((prev) => ({
-                          ...prev,
-                          finalAverage: e.target.value,
-                        }))
-                      }
-                      placeholder="ממוצע"
-                    />
-                  </TableCell>
-                  <TableCell>
-                    <IconButton onClick={handleSaveNewGrade} color="primary">
-                      <SaveIcon />
-                    </IconButton>
-                  </TableCell>
-                </TableRow>
-              )}
-
-              {sorted.map((g) => (
-                <TableRow key={g.id}>
-                  <TableCell>{g.courseName}</TableCell>
-                  <TableCell>{g.examGrade}</TableCell>
-                  <TableCell>{g.assignmentGrade}</TableCell>
-                  <TableCell>{g.finalAverage}</TableCell>
-                  {isManagement && (
-                    <TableCell>
-                      <Button
-                        variant="outlined"
-                        onClick={() =>
-                          navigate(`/management/grades/${g.id}`)
-                        }
-                        sx={{ mr: 1 }}
-                      >
-                        ערוך
-                      </Button>
-                      <IconButton
-                        onClick={() => handleDelete(g.id)}
-                        color="error"
-                      >
-                        <DeleteIcon />
-                      </IconButton>
-                    </TableCell>
-                  )}
+                  <TableCell>{g.examGrade ?? "N/A"}</TableCell>
+                  <TableCell>{g.assignmentGrade ?? "N/A"}</TableCell>
+                  <TableCell>{g.finalAverage ?? "N/A"}</TableCell>
                 </TableRow>
               ))}
             </TableBody>
           </Table>
         </TableContainer>
       )}
+
+      {/* Pop-Up with slide-down effect */}
+      <Dialog
+        open={open}
+        onClose={handleClose}
+        TransitionComponent={Transition}
+        keepMounted
+        PaperProps={{
+          sx: {
+            borderRadius: 4,
+            p: 2,
+            minWidth: 380,
+            maxWidth: "90vw",
+            boxShadow: 10,
+          },
+        }}
+      >
+        <DialogTitle
+          sx={{
+            fontFamily: "Assistant",
+            fontWeight: "bold",
+            fontSize: "1.5rem",
+            pb: 1,
+            textAlign: "center",
+          }}
+        >
+          Grade Details
+        </DialogTitle>
+        <DialogContent
+          sx={{
+            fontFamily: "Assistant",
+            display: "flex",
+            flexDirection: "column",
+            gap: 2,
+            pt: 1,
+          }}
+        >
+          {selectedGrade && (
+            <>
+              <Typography fontSize="1.1rem"><strong>Course Name:</strong> {selectedGrade.courseName}</Typography>
+              <Typography fontSize="1.1rem"><strong>Exam Grade:</strong> {selectedGrade.examGrade ?? "N/A"}</Typography>
+              <Typography fontSize="1.1rem"><strong>Assignment Grade:</strong> {selectedGrade.assignmentGrade ?? "N/A"}</Typography>
+              <Typography fontSize="1.1rem"><strong>Final Average:</strong> {selectedGrade.finalAverage ?? "N/A"}</Typography>
+              <Box sx={{ textAlign: "right", mt: 2 }}>
+                <Typography variant="caption" sx={{ color: "#999" }}>
+                  ID: {selectedGrade.id ?? "N/A"}
+                </Typography>
+              </Box>
+            </>
+          )}
+        </DialogContent>
+      </Dialog>
     </Box>
   );
 }

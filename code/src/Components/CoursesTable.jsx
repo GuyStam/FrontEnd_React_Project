@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, forwardRef } from "react";
 import {
   Box,
   Typography,
@@ -14,11 +14,23 @@ import {
   CircularProgress,
   TableSortLabel,
   IconButton,
+  Dialog,
+  DialogTitle,
+  DialogContent,
+  Slide,
 } from "@mui/material";
 import { useNavigate, useLocation } from "react-router-dom";
-import { listCourses, addCourse, deleteCourse } from "../assets/firebase/Courses";
+import {
+  listCourses,
+  addCourse,
+  deleteCourse,
+} from "../assets/firebase/Courses";
 import DeleteIcon from "@mui/icons-material/Delete";
 import SaveIcon from "@mui/icons-material/Save";
+
+const Transition = forwardRef(function Transition(props, ref) {
+  return <Slide direction="down" ref={ref} {...props} />;
+});
 
 export default function CoursesTable() {
   const [courses, setCourses] = useState([]);
@@ -32,6 +44,9 @@ export default function CoursesTable() {
     year: "",
     semester: "",
   });
+
+  const [open, setOpen] = useState(false);
+  const [selectedCourse, setSelectedCourse] = useState(null);
 
   const navigate = useNavigate();
   const location = useLocation();
@@ -62,6 +77,22 @@ export default function CoursesTable() {
     setNewCourse({ courseName: "", lecturer: "", year: "", semester: "" });
   };
 
+  const handleOpenDialog = (course) => {
+    setSelectedCourse(course);
+    setOpen(true);
+  };
+
+  const handleCloseDialog = () => {
+    setOpen(false);
+    setSelectedCourse(null);
+  };
+
+  const formatDate = (dateStr) => {
+    if (!dateStr) return "N/A";
+    const date = new Date(dateStr);
+    return date.toLocaleString("en-GB");
+  };
+
   const filtered = courses.filter((c) =>
     Object.values(c)
       .join(" ")
@@ -85,12 +116,12 @@ export default function CoursesTable() {
 
   return (
     <Box sx={{ maxWidth: 960, mx: "auto", mt: 4, px: 2 }}>
-      <Typography variant="h4" align="center" gutterBottom>
-        {isManagement ? "ניהול קורסים" : "רשימת קורסים"}
+      <Typography variant="h4" align="center" gutterBottom sx={{ fontFamily: "Assistant" }}>
+        {isManagement ? "Manage Courses" : "My Courses"}
       </Typography>
 
       <TextField
-        label="חיפוש כללי (Ctrl+F)"
+        label="Search"
         fullWidth
         size="small"
         sx={{ mb: 2 }}
@@ -108,10 +139,10 @@ export default function CoursesTable() {
             <TableHead>
               <TableRow sx={{ backgroundColor: "#eee" }}>
                 {[
-                  { id: "courseName", label: "שם קורס" },
-                  { id: "lecturer", label: "מרצה" },
-                  { id: "year", label: "שנה" },
-                  { id: "semester", label: "סמסטר" },
+                  { id: "courseName", label: "Course Name" },
+                  { id: "lecturer", label: "Lecturer" },
+                  { id: "year", label: "Year" },
+                  { id: "semester", label: "Semester" },
                 ].map((col) => (
                   <TableCell key={col.id}>
                     <TableSortLabel
@@ -123,7 +154,7 @@ export default function CoursesTable() {
                     </TableSortLabel>
                   </TableCell>
                 ))}
-                {isManagement && <TableCell>פעולות</TableCell>}
+                {isManagement && <TableCell>Actions</TableCell>}
               </TableRow>
             </TableHead>
             <TableBody>
@@ -139,7 +170,7 @@ export default function CoursesTable() {
                           courseName: e.target.value,
                         }))
                       }
-                      placeholder="שם קורס"
+                      placeholder="Course Name"
                     />
                   </TableCell>
                   <TableCell>
@@ -152,7 +183,7 @@ export default function CoursesTable() {
                           lecturer: e.target.value,
                         }))
                       }
-                      placeholder="מרצה"
+                      placeholder="Lecturer"
                     />
                   </TableCell>
                   <TableCell>
@@ -165,7 +196,7 @@ export default function CoursesTable() {
                           year: e.target.value,
                         }))
                       }
-                      placeholder="שנה"
+                      placeholder="Year"
                     />
                   </TableCell>
                   <TableCell>
@@ -178,7 +209,7 @@ export default function CoursesTable() {
                           semester: e.target.value,
                         }))
                       }
-                      placeholder="סמסטר"
+                      placeholder="Semester"
                     />
                   </TableCell>
                   <TableCell>
@@ -191,7 +222,16 @@ export default function CoursesTable() {
 
               {sorted.map((c) => (
                 <TableRow key={c.id}>
-                  <TableCell>{c.courseName}</TableCell>
+                  <TableCell
+                    onClick={() => !isManagement && handleOpenDialog(c)}
+                    sx={{
+                      color: !isManagement ? "#7FC243" : "inherit",
+                      fontWeight: "bold",
+                      cursor: !isManagement ? "pointer" : "default",
+                    }}
+                  >
+                    {c.courseName}
+                  </TableCell>
                   <TableCell>{c.lecturer}</TableCell>
                   <TableCell>{c.year}</TableCell>
                   <TableCell>{c.semester}</TableCell>
@@ -199,12 +239,10 @@ export default function CoursesTable() {
                     <TableCell>
                       <Button
                         variant="outlined"
-                        onClick={() =>
-                          navigate(`/management/courses/${c.id}`)
-                        }
+                        onClick={() => navigate(`/management/courses/${c.id}`)}
                         sx={{ mr: 1 }}
                       >
-                        ערוך
+                        Edit
                       </Button>
                       <IconButton
                         onClick={() => handleDelete(c.id)}
@@ -220,6 +258,61 @@ export default function CoursesTable() {
           </Table>
         </TableContainer>
       )}
+
+      {/* Pop-Up */}
+      <Dialog
+        open={open}
+        onClose={handleCloseDialog}
+        TransitionComponent={Transition}
+        keepMounted
+        PaperProps={{
+          sx: {
+            borderRadius: 4,
+            p: 2,
+            minWidth: 380,
+            maxWidth: "90vw",
+            boxShadow: 10,
+          },
+        }}
+      >
+        <DialogTitle
+          sx={{
+            fontFamily: "Assistant",
+            fontWeight: "bold",
+            fontSize: "1.5rem",
+            pb: 1,
+            textAlign: "center",
+          }}
+        >
+          Course Details
+        </DialogTitle>
+        <DialogContent
+          sx={{
+            fontFamily: "Assistant",
+            display: "flex",
+            flexDirection: "column",
+            gap: 2,
+            pt: 1,
+          }}
+        >
+          {selectedCourse && (
+            <>
+              <Typography fontSize="1.1rem"><strong>Course Name:</strong> {selectedCourse.courseName}</Typography>
+              <Typography fontSize="1.1rem"><strong>Lecturer:</strong> {selectedCourse.lecturer}</Typography>
+              <Typography fontSize="1.1rem"><strong>Year:</strong> {selectedCourse.year}</Typography>
+              <Typography fontSize="1.1rem"><strong>Semester:</strong> {selectedCourse.semester}</Typography>
+              <Typography fontSize="1.1rem"><strong>Next Class:</strong> {formatDate(selectedCourse.nextClass)}</Typography>
+              <Typography fontSize="1.1rem"><strong>Next Assignment:</strong> {formatDate(selectedCourse.nextAssignment)}</Typography>
+              <Typography fontSize="1.1rem"><strong>Final Average:</strong> {selectedCourse.grades?.finalAverage ?? "N/A"}</Typography>
+              <Box sx={{ textAlign: "right", mt: 2 }}>
+                <Typography variant="caption" sx={{ color: "#999" }}>
+                  ID: {selectedCourse.id ?? "N/A"}
+                </Typography>
+              </Box>
+            </>
+          )}
+        </DialogContent>
+      </Dialog>
     </Box>
   );
 }

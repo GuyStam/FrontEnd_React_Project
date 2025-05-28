@@ -24,25 +24,25 @@ export default function App() {
       <Container sx={{ mt: 4 }}>
         <Routes>
 
-          {/* דף הבית */}
+          {/* Home */}
           <Route path="/" element={<HomePage />} />
           <Route path="/HomeCards" element={<HomeCards />} />
 
-          {/* טפסים - תצוגה בלבד */}
+          {/* Forms - view only */}
           <Route path="/forms" element={<Forms />} />
           <Route path="/forms/courses" element={<CoursesTable />} />
           <Route path="/forms/courses/:courseId" element={<CoursesForm />} />
           <Route path="/forms/grades" element={<GradesTable />} />
           <Route path="/forms/grades/:gradeId" element={<GradeForm />} />
 
-          {/* ניהול - עם אפשרות עריכה */}
+          {/* Management - full edit */}
           <Route path="/management" element={<Management />} />
           <Route path="/management/courses" element={<CoursesTable />} />
           <Route path="/management/courses/:courseId" element={<CoursesManagement />} />
-          <Route path="/management/grades" element={<GradesTable />} />
+          <Route path="/management/grades" element={<GradesManagement />} />
           <Route path="/management/grades/:gradeId" element={<GradesManagement />} />
 
-          {/* עזרה ומידע */}
+          {/* Help and Info */}
           <Route path="/help" element={<Help />} />
           <Route path="/info" element={<Info />} />
           

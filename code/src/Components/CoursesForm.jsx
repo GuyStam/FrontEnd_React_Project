@@ -37,13 +37,13 @@ export default function CoursesForm() {
   if (!course) {
     return (
       <Typography variant="h6" align="center" sx={{ mt: 4 }}>
-        הקורס לא נמצא.
+        Course not found.
       </Typography>
     );
   }
 
   const fmt = date =>
-    new Date(date).toLocaleString("he-IL", { hour12: false });
+    new Date(date).toLocaleString("en-GB", { hour12: false });
 
   return (
     <Box sx={{ maxWidth: 960, mx: "auto", mt: 4, px: 2 }}>
@@ -53,7 +53,7 @@ export default function CoursesForm() {
         gutterBottom
         sx={{ fontFamily: "Assistant", fontWeight: "bold" }}
       >
-        פרטי קורס
+        Course Details
       </Typography>
 
       <TableContainer component={Paper}>
@@ -61,13 +61,13 @@ export default function CoursesForm() {
           <TableHead>
             <TableRow sx={{ backgroundColor: "#f0f0f0" }}>
               {[
-                "שם קורס",
-                "מרצה",
-                "שנה",
-                "סמסטר",
-                "שיעור הבא",
-                "הגשה הבאה",
-                "ממוצע סופי",
+                "Course Name",
+                "Lecturer",
+                "Year",
+                "Semester",
+                "Next Class",
+                "Next Assignment",
+                "Final Average",
               ].map(h => (
                 <TableCell
                   key={h}
