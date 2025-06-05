@@ -51,10 +51,6 @@ export function InfoStats() {
       <Typography variant="body1" sx={{ mb: 3 }}>
         Here you can find useful insights and stats about your activity in the system.
       </Typography>
-
-      <Grid container spacing={3}>
-        {/* Add content here */}
-      </Grid>
     </Box>
   );
 }

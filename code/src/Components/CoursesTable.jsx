@@ -1,3 +1,4 @@
+// (אותו ייבוא בדיוק כמו לפני כן)
 import React, { useState, useEffect, forwardRef } from "react";
 import {
   Box,
@@ -17,6 +18,7 @@ import {
   Dialog,
   DialogTitle,
   DialogContent,
+  DialogActions,
   Slide,
 } from "@mui/material";
 import { useNavigate, useLocation } from "react-router-dom";
@@ -48,6 +50,9 @@ export default function CoursesTable() {
   const [open, setOpen] = useState(false);
   const [selectedCourse, setSelectedCourse] = useState(null);
 
+  const [openDeleteDialog, setOpenDeleteDialog] = useState(false);
+  const [courseToDelete, setCourseToDelete] = useState(null);
+
   const navigate = useNavigate();
   const location = useLocation();
   const isManagement = location.pathname.startsWith("/management");
@@ -65,9 +70,23 @@ export default function CoursesTable() {
     setOrderBy(field);
   };
 
-  const handleDelete = async (id) => {
-    await deleteCourse(id);
-    setCourses((prev) => prev.filter((c) => c.id !== id));
+  const handleDelete = async () => {
+    if (courseToDelete) {
+      await deleteCourse(courseToDelete.id);
+      setCourses((prev) => prev.filter((c) => c.id !== courseToDelete.id));
+      setCourseToDelete(null);
+      setOpenDeleteDialog(false);
+    }
+  };
+
+  const handleOpenDeleteDialog = (course) => {
+    setCourseToDelete(course);
+    setOpenDeleteDialog(true);
+  };
+
+  const handleCancelDelete = () => {
+    setCourseToDelete(null);
+    setOpenDeleteDialog(false);
   };
 
   const handleSaveNewCourse = async () => {
@@ -245,7 +264,7 @@ export default function CoursesTable() {
                         Edit
                       </Button>
                       <IconButton
-                        onClick={() => handleDelete(c.id)}
+                        onClick={() => handleOpenDeleteDialog(c)}
                         color="error"
                       >
                         <DeleteIcon />
@@ -259,7 +278,7 @@ export default function CoursesTable() {
         </TableContainer>
       )}
 
-      {/* Pop-Up */}
+      {/* Dialog הצגת פרטי קורס */}
       <Dialog
         open={open}
         onClose={handleCloseDialog}
@@ -312,6 +331,15 @@ export default function CoursesTable() {
             </>
           )}
         </DialogContent>
+      </Dialog>
+
+      {/* Dialog אישור מחיקה */}
+      <Dialog open={openDeleteDialog} onClose={handleCancelDelete}>
+        <DialogTitle>Are you sure you want to delete this course?</DialogTitle>
+        <DialogActions>
+          <Button onClick={handleCancelDelete} color="primary">Cancel</Button>
+          <Button onClick={handleDelete} color="error" variant="contained">Delete</Button>
+        </DialogActions>
       </Dialog>
     </Box>
   );
