@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect } from 'react';
 import {
   Box,
   Typography,
@@ -10,9 +10,9 @@ import {
   TableRow,
   Paper,
   CircularProgress,
-} from "@mui/material";
-import { useParams } from "react-router-dom";
-import { getCourse } from "../assets/firebase/Courses";
+} from '@mui/material';
+import { useParams } from 'react-router-dom';
+import { getCourse } from '../assets/firebase/Courses';
 
 export default function CoursesForm() {
   const { courseId } = useParams();
@@ -21,14 +21,14 @@ export default function CoursesForm() {
 
   useEffect(() => {
     getCourse(courseId)
-      .then(data => setCourse(data))
+      .then((data) => setCourse(data))
       .catch(console.error)
       .finally(() => setLoading(false));
   }, [courseId]);
 
   if (loading) {
     return (
-      <Box sx={{ display: "flex", justifyContent: "center", mt: 4 }}>
+      <Box sx={{ display: 'flex', justifyContent: 'center', mt: 4 }}>
         <CircularProgress />
       </Box>
     );
@@ -42,16 +42,15 @@ export default function CoursesForm() {
     );
   }
 
-  const fmt = date =>
-    new Date(date).toLocaleString("en-GB", { hour12: false });
+  const fmt = (date) => new Date(date).toLocaleString('en-GB', { hour12: false });
 
   return (
-    <Box sx={{ maxWidth: 960, mx: "auto", mt: 4, px: 2 }}>
+    <Box sx={{ maxWidth: 960, mx: 'auto', mt: 4, px: 2 }}>
       <Typography
         variant="h4"
         align="center"
         gutterBottom
-        sx={{ fontFamily: "Assistant", fontWeight: "bold" }}
+        sx={{ fontFamily: 'Assistant', fontWeight: 'bold' }}
       >
         Course Details
       </Typography>
@@ -59,20 +58,17 @@ export default function CoursesForm() {
       <TableContainer component={Paper}>
         <Table>
           <TableHead>
-            <TableRow sx={{ backgroundColor: "#f0f0f0" }}>
+            <TableRow sx={{ backgroundColor: '#f0f0f0' }}>
               {[
-                "Course Name",
-                "Lecturer",
-                "Year",
-                "Semester",
-                "Next Class",
-                "Next Assignment",
-                "Final Average",
-              ].map(h => (
-                <TableCell
-                  key={h}
-                  sx={{ fontFamily: "Assistant", fontWeight: "bold" }}
-                >
+                'Course Name',
+                'Lecturer',
+                'Year',
+                'Semester',
+                'Next Class',
+                'Next Assignment',
+                'Final Average',
+              ].map((h) => (
+                <TableCell key={h} sx={{ fontFamily: 'Assistant', fontWeight: 'bold' }}>
                   {h}
                 </TableCell>
               ))}
@@ -86,7 +82,7 @@ export default function CoursesForm() {
               <TableCell>{course.semester}</TableCell>
               <TableCell>{fmt(course.nextClass)}</TableCell>
               <TableCell>{fmt(course.nextAssignment)}</TableCell>
-              <TableCell>{course.grades?.finalAverage ?? "N/A"}</TableCell>
+              <TableCell>{course.grades?.finalAverage ?? 'N/A'}</TableCell>
             </TableRow>
           </TableBody>
         </Table>

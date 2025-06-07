@@ -1,21 +1,21 @@
-import React from "react";
-import { Routes, Route } from "react-router-dom";
-import { Container } from "@mui/material";
-import "./app.css";
+import React from 'react';
+import { Routes, Route } from 'react-router-dom';
+import { Container } from '@mui/material';
+import './app.css';
 
-import Header from "./Header";
-import HomePage from "./HomePage";
-import HomeCards from "./Components/HomeCards";
-import Forms from "./Components/Forms";
-import CoursesForm from "./Components/CoursesForm";
-import GradeForm from "./Components/GradeForm";
-import CoursesTable from "./Components/CoursesTable";
-import GradesTable from "./Components/GradesTable";
-import Management from "./Components/Management";
-import CoursesManagement from "./Components/CoursesManagement";
-import GradesManagement from "./Components/GradesManagement";
-import Help from "./Components/Help";
-import Info from "./Components/Info";
+import Header from './Header';
+import HomePage from './HomePage';
+import HomeCards from './Components/HomeCards';
+import Forms from './Components/Forms';
+import CoursesForm from './Components/CoursesForm';
+import GradeForm from './Components/GradeForm';
+import CoursesTable from './Components/CoursesTable';
+import GradesTable from './Components/GradesTable';
+import Management from './Components/Management';
+import CoursesManagement from './Components/CoursesManagement';
+import GradesManagement from './Components/GradesManagement';
+import Help from './Components/Help';
+import Info from './Components/Info';
 
 export default function App() {
   return (
@@ -23,7 +23,6 @@ export default function App() {
       <Header />
       <Container sx={{ mt: 4 }}>
         <Routes>
-
           {/* Home */}
           <Route path="/" element={<HomePage />} />
           <Route path="/HomeCards" element={<HomeCards />} />
@@ -45,7 +44,6 @@ export default function App() {
           {/* Help and Info */}
           <Route path="/help" element={<Help />} />
           <Route path="/info" element={<Info />} />
-          
         </Routes>
       </Container>
     </>

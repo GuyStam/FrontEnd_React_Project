@@ -1,63 +1,55 @@
-import {
-  addDoc,
-  collection,
-  getDocs,
-  getDoc,
-  updateDoc,
-  deleteDoc,
-  doc
-} from "firebase/firestore";
-import { firestore } from "./config";
+import { addDoc, collection, getDocs, getDoc, updateDoc, deleteDoc, doc } from 'firebase/firestore';
+import { firestore } from './config';
 
-const COL = "Courses";
+const COL = 'Courses';
 
 // קורסים התחלתיים
 const seedCourses = [
   {
-    courseName: "Database Systems",
-    lecturer: "Dr. Cohen",
+    courseName: 'Database Systems',
+    lecturer: 'Dr. Cohen',
     year: 2025,
-    semester: "A",
+    semester: 'A',
     nextClass: new Date().toISOString(),
     nextAssignment: new Date().toISOString(),
-    grades: { finalAverage: 85 }
+    grades: { finalAverage: 85 },
   },
   {
-    courseName: "Network Fundamentals",
-    lecturer: "Prof. Levy",
+    courseName: 'Network Fundamentals',
+    lecturer: 'Prof. Levy',
     year: 2025,
-    semester: "B",
+    semester: 'B',
     nextClass: new Date().toISOString(),
     nextAssignment: new Date().toISOString(),
-    grades: { finalAverage: 78 }
+    grades: { finalAverage: 78 },
   },
   {
-    courseName: "Information Security",
-    lecturer: "Dr. Bar",
+    courseName: 'Information Security',
+    lecturer: 'Dr. Bar',
     year: 2025,
-    semester: "A",
+    semester: 'A',
     nextClass: new Date().toISOString(),
     nextAssignment: new Date().toISOString(),
-    grades: { finalAverage: 90 }
+    grades: { finalAverage: 90 },
   },
   {
-    courseName: "Web Development",
-    lecturer: "Ms. Mor",
+    courseName: 'Web Development',
+    lecturer: 'Ms. Mor',
     year: 2025,
-    semester: "B",
+    semester: 'B',
     nextClass: new Date().toISOString(),
     nextAssignment: new Date().toISOString(),
-    grades: { finalAverage: 88 }
+    grades: { finalAverage: 88 },
   },
   {
-    courseName: "ERP Systems",
-    lecturer: "Mr. Yaron",
+    courseName: 'ERP Systems',
+    lecturer: 'Mr. Yaron',
     year: 2025,
-    semester: "Summer",
+    semester: 'Summer',
     nextClass: new Date().toISOString(),
     nextAssignment: new Date().toISOString(),
-    grades: { finalAverage: 82 }
-  }
+    grades: { finalAverage: 82 },
+  },
 ];
 
 // הוספת קורס חדש
@@ -70,8 +62,8 @@ export async function addCourse(course) {
     nextClass: course.nextClass ?? new Date().toISOString(),
     nextAssignment: course.nextAssignment ?? new Date().toISOString(),
     grades: {
-      finalAverage: Number(course.grades?.finalAverage ?? 0)
-    }
+      finalAverage: Number(course.grades?.finalAverage ?? 0),
+    },
   });
   return docRef.id;
 }
@@ -84,11 +76,11 @@ export async function listCourses() {
       await addCourse(c);
     }
     const newSnap = await getDocs(collection(firestore, COL));
-    return newSnap.docs.map(doc => ({ id: doc.id, ...doc.data() }));
+    return newSnap.docs.map((doc) => ({ id: doc.id, ...doc.data() }));
   }
-  return snapshot.docs.map(doc => ({
+  return snapshot.docs.map((doc) => ({
     id: doc.id,
-    ...doc.data()
+    ...doc.data(),
   }));
 }
 

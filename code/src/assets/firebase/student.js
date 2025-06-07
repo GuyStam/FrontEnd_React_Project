@@ -1,7 +1,7 @@
-import { doc, getDoc, setDoc } from "firebase/firestore";
-import { firestore } from "./config";
+import { doc, getDoc, setDoc } from 'firebase/firestore';
+import { firestore } from './config';
 
-const docRef = doc(firestore, "Students", "current");
+const docRef = doc(firestore, 'Students', 'current');
 
 export async function getStudentInfo() {
   const snap = await getDoc(docRef);

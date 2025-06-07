@@ -1,9 +1,9 @@
 // Info.jsx
-import React, { useState, useEffect } from "react";
-import { Box, Typography, Grid } from "@mui/material";
-import InfoBox from "../Components/InfoBox";
-import AssignmentIcon from "@mui/icons-material/Assignment";
-import { getStudentInfo } from "../assets/firebase/student";
+import React, { useState, useEffect } from 'react';
+import { Box, Typography, Grid } from '@mui/material';
+import InfoBox from '../Components/InfoBox';
+import AssignmentIcon from '@mui/icons-material/Assignment';
+import { getStudentInfo } from '../assets/firebase/student';
 
 function Info() {
   const [info, setInfo] = useState(null);
@@ -21,19 +21,23 @@ function Info() {
 
     return (
       <span>
-        <strong>Name:</strong> {info.fullName || "-"}<br />
-        <strong>Email:</strong> {info.email || "-"}<br />
-        <strong>Address:</strong> {info.address || "-"}<br />
-        <strong>Phone:</strong> {info.phone || "-"}<br />
-        <strong>ID Number:</strong> {info.idNumber || "-"}
+        <strong>Name:</strong> {info.fullName || '-'}
+        <br />
+        <strong>Email:</strong> {info.email || '-'}
+        <br />
+        <strong>Address:</strong> {info.address || '-'}
+        <br />
+        <strong>Phone:</strong> {info.phone || '-'}
+        <br />
+        <strong>ID Number:</strong> {info.idNumber || '-'}
       </span>
     );
   };
 
   return (
-    <Box sx={{ mt: 4, display: "flex", justifyContent: "center" }}>
+    <Box sx={{ mt: 4, display: 'flex', justifyContent: 'center' }}>
       <InfoBox
-        icon={<AssignmentIcon sx={{ fontSize: 40, color: "#7FC243" }} />}
+        icon={<AssignmentIcon sx={{ fontSize: 40, color: '#7FC243' }} />}
         title="Student Information"
         content={buildContent()}
       />

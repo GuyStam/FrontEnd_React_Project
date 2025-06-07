@@ -9,7 +9,11 @@ body {
 }
 
 /* עיצוב כותרות */
-h1, h2, h3, h4, h5 {
+h1,
+h2,
+h3,
+h4,
+h5 {
   font-family: 'Assistant', sans-serif;
   font-weight: bold;
   color: #000;
@@ -22,11 +26,14 @@ table {
   border-collapse: collapse;
 }
 
-table, th, td {
-  border: 1px solid #7FC243;
+table,
+th,
+td {
+  border: 1px solid #7fc243;
 }
 
-th, td {
+th,
+td {
   padding: 10px;
   text-align: left;
 }
@@ -41,15 +48,17 @@ tr {
 }
 
 /* עיצוב כפתורים */
-button, .MuiButton-root {
-  background-color: #7FC243;
+button,
+.MuiButton-root {
+  background-color: #7fc243;
   color: white;
   font-weight: bold;
   text-transform: none;
 }
 
-button:hover, .MuiButton-root:hover {
-  background-color: #6DAF34;
+button:hover,
+.MuiButton-root:hover {
+  background-color: #6daf34;
 }
 
 /* עיצוב טפסים */
@@ -63,13 +72,13 @@ button:hover, .MuiButton-root:hover {
 
 /* עיצוב Snackbar */
 .MuiSnackbar-root {
-  background-color: #7FC243;
+  background-color: #7fc243;
   color: white;
 }
 
 /* עיצוב טבלה עם גבולות */
 .MuiTableCell-root {
-  border: 1px solid #7FC243;
+  border: 1px solid #7fc243;
   padding: 10px;
 }
 
@@ -79,12 +88,12 @@ button:hover, .MuiButton-root:hover {
 
 /* צבעים */
 .text-green {
-  color: #7FC243;
+  color: #7fc243;
 }
 
 /* עיצוב כללי לטבלאות */
 .table-container {
-  border: 1px solid #7FC243;
+  border: 1px solid #7fc243;
   border-radius: 8px;
   background-color: white;
 }
@@ -94,7 +103,7 @@ button:hover, .MuiButton-root:hover {
 }
 
 .table-cell {
-  border: 1px solid #7FC243;
+  border: 1px solid #7fc243;
 }
 
 /* מרווחים כלליים */

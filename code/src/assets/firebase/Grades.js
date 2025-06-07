@@ -1,26 +1,18 @@
-import {
-  addDoc,
-  collection,
-  getDocs,
-  getDoc,
-  updateDoc,
-  deleteDoc,
-  doc,
-} from "firebase/firestore";
-import { firestore } from "./config";
+import { addDoc, collection, getDocs, getDoc, updateDoc, deleteDoc, doc } from 'firebase/firestore';
+import { firestore } from './config';
 
-const COL = "Grades";
+const COL = 'Grades';
 
 // ציונים התחלתיים (לא חובה אבל שימושי)
 const seedGrades = [
   {
-    courseName: "Database Systems",
+    courseName: 'Database Systems',
     examGrade: 90,
     assignmentGrade: 85,
     finalAverage: 87,
   },
   {
-    courseName: "Network Fundamentals",
+    courseName: 'Network Fundamentals',
     examGrade: 75,
     assignmentGrade: 80,
     finalAverage: 78,
@@ -46,9 +38,9 @@ export async function listGrades() {
       await addGrade(g);
     }
     const newSnap = await getDocs(collection(firestore, COL));
-    return newSnap.docs.map(doc => ({ id: doc.id, ...doc.data() }));
+    return newSnap.docs.map((doc) => ({ id: doc.id, ...doc.data() }));
   }
-  return snapshot.docs.map(doc => ({
+  return snapshot.docs.map((doc) => ({
     id: doc.id,
     ...doc.data(),
   }));
