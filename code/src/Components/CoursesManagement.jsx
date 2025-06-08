@@ -1,13 +1,7 @@
-import React, { useState, useEffect } from "react";
-import {
-  Box,
-  TextField,
-  Button,
-  Typography,
-  CircularProgress,
-} from "@mui/material";
-import { useParams, useNavigate } from "react-router-dom";
-import { getCourse, updateCourse } from "../assets/firebase/Courses";
+import React, { useState, useEffect } from 'react';
+import { Box, TextField, Button, Typography, CircularProgress } from '@mui/material';
+import { useParams, useNavigate } from 'react-router-dom';
+import { getCourse, updateCourse } from '../assets/firebase/Courses';
 
 export default function CoursesManagement() {
   const { courseId } = useParams();
@@ -15,13 +9,13 @@ export default function CoursesManagement() {
 
   const [loading, setLoading] = useState(true);
   const [values, setValues] = useState({
-    courseName: "",
-    lecturer: "",
-    year: "",
-    semester: "",
-    nextClass: "",
-    nextAssignment: "",
-    grades: { finalAverage: "" },
+    courseName: '',
+    lecturer: '',
+    year: '',
+    semester: '',
+    nextClass: '',
+    nextAssignment: '',
+    grades: { finalAverage: '' },
   });
 
   useEffect(() => {
@@ -31,14 +25,14 @@ export default function CoursesManagement() {
         .then((data) => {
           if (data && mounted) {
             setValues({
-              courseName: data.courseName ?? "",
-              lecturer: data.lecturer ?? "",
-              year: data.year ?? "",
-              semester: data.semester ?? "",
-              nextClass: data.nextClass ?? "",
-              nextAssignment: data.nextAssignment ?? "",
+              courseName: data.courseName ?? '',
+              lecturer: data.lecturer ?? '',
+              year: data.year ?? '',
+              semester: data.semester ?? '',
+              nextClass: data.nextClass ?? '',
+              nextAssignment: data.nextAssignment ?? '',
               grades: {
-                finalAverage: data.grades?.finalAverage ?? "",
+                finalAverage: data.grades?.finalAverage ?? '',
               },
             });
           }
@@ -53,7 +47,7 @@ export default function CoursesManagement() {
 
   const handleChange = (e) => {
     const { name, value } = e.target;
-    if (name === "finalAverage") {
+    if (name === 'finalAverage') {
       setValues((prev) => ({
         ...prev,
         grades: { ...prev.grades, finalAverage: value },
@@ -68,7 +62,7 @@ export default function CoursesManagement() {
     setLoading(true);
     try {
       await updateCourse(courseId, values);
-      navigate("/management/courses");
+      navigate('/management/courses');
     } catch (error) {
       console.error(error);
     } finally {
@@ -78,23 +72,19 @@ export default function CoursesManagement() {
 
   if (loading) {
     return (
-      <Box sx={{ display: "flex", justifyContent: "center", mt: 4 }}>
+      <Box sx={{ display: 'flex', justifyContent: 'center', mt: 4 }}>
         <CircularProgress />
       </Box>
     );
   }
 
   return (
-    <Box
-      component="form"
-      onSubmit={handleSubmit}
-      sx={{ maxWidth: 600, mx: "auto", mt: 4 }}
-    >
+    <Box component="form" onSubmit={handleSubmit} sx={{ maxWidth: 600, mx: 'auto', mt: 4 }}>
       <Typography
         variant="h4"
         align="center"
         gutterBottom
-        sx={{ fontFamily: "Assistant", fontWeight: "bold" }}
+        sx={{ fontFamily: 'Assistant', fontWeight: 'bold' }}
       >
         Edit Course
       </Typography>
@@ -156,12 +146,7 @@ export default function CoursesManagement() {
         onChange={handleChange}
       />
 
-      <Button
-        type="submit"
-        variant="contained"
-        color="primary"
-        sx={{ mt: 3 }}
-      >
+      <Button type="submit" variant="contained" color="primary" sx={{ mt: 3 }}>
         Save
       </Button>
     </Box>

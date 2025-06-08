@@ -1,56 +1,48 @@
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect } from 'react';
 import {
-  Box,
-  Typography,
-  TextField,
-  Table,
-  TableBody,
-  TableCell,
-  TableContainer,
-  TableHead,
-  TableRow,
-  Paper,
-  TableSortLabel,
-  CircularProgress,
-  Dialog,
-  DialogTitle,
-  DialogActions,
-  Button,
-} from "@mui/material";
-import { useNavigate, useLocation } from "react-router-dom";
-import { listCourses, addCourse, deleteCourse } from "../assets/firebase/Courses";
-import AddCourseRow from "./AddCourseRow";
-import CourseRow from "./CourseRow";
-import CourseDialog from "./CourseDialog";
+  Box, Typography, TextField, Table, TableBody, TableCell,
+  TableContainer, TableHead, TableRow, Paper, TableSortLabel,
+  CircularProgress, Dialog, DialogTitle, DialogActions, Button,
+} from '@mui/material';
+import { useNavigate, useLocation } from 'react-router-dom';
+import { listCourses, addCourse, deleteCourse } from '../assets/firebase/Courses';
+import AddCourseRow from './AddCourseRow';
+import CourseRow from './CourseRow';
+import CourseDialog from './CourseDialog';
 
 export default function CoursesTable() {
   const [courses, setCourses] = useState([]);
   const [loading, setLoading] = useState(true);
-  const [searchTerm, setSearchTerm] = useState("");
-  const [orderBy, setOrderBy] = useState("courseName");
-  const [orderDirection, setOrderDirection] = useState("asc");
+  const [searchTerm, setSearchTerm] = useState('');
+  const [orderBy, setOrderBy] = useState('courseName');
+  const [orderDirection, setOrderDirection] = useState('asc');
   const [newCourse, setNewCourse] = useState({
-    courseName: "",
-    lecturer: "",
-    year: "",
-    semester: "",
+    courseName: '',
+    lecturer: '',
+    year: '',
+    semester: '',
   });
 
   const [open, setOpen] = useState(false);
   const [selectedCourse, setSelectedCourse] = useState(null);
-
   const [openDeleteDialog, setOpenDeleteDialog] = useState(false);
   const [courseToDelete, setCourseToDelete] = useState(null);
 
   const navigate = useNavigate();
   const location = useLocation();
-  const isManagement = location.pathname.startsWith("/management");
+  const isManagement = location.pathname.startsWith('/management');
 
   useEffect(() => {
     let mounted = true;
     const load = async () => {
-      const data = await listCourses();
-      if (mounted) setCourses(data);
+      try {
+        const data = await listCourses();
+        if (mounted) setCourses(data);
+      } catch (err) {
+        console.error("Failed to load courses:", err);
+      } finally {
+        if (mounted) setLoading(false);
+      }
     };
     load();
     return () => {
@@ -59,8 +51,8 @@ export default function CoursesTable() {
   }, []);
 
   const handleSort = (field) => {
-    const isAsc = orderBy === field && orderDirection === "asc";
-    setOrderDirection(isAsc ? "desc" : "asc");
+    const isAsc = orderBy === field && orderDirection === 'asc';
+    setOrderDirection(isAsc ? 'desc' : 'asc');
     setOrderBy(field);
   };
 
@@ -77,8 +69,10 @@ export default function CoursesTable() {
   const handleSaveNewCourse = async () => {
     if (!newCourse.courseName || !newCourse.lecturer) return;
     const newId = await addCourse(newCourse);
-    setCourses((prev) => [...prev, { id: newId, ...newCourse }]);
-    setNewCourse({ courseName: "", lecturer: "", year: "", semester: "" });
+    if (newId) {
+      setCourses((prev) => [...prev, { id: newId, ...newCourse }]);
+    }
+    setNewCourse({ courseName: '', lecturer: '', year: '', semester: '' });
   };
 
   const handleOpenDeleteDialog = (course) => {
@@ -101,26 +95,31 @@ export default function CoursesTable() {
   };
 
   const filtered = courses.filter((c) =>
-    Object.values(c).join(" ").toLowerCase().includes(searchTerm.toLowerCase())
+    Object.values(c).join(' ').toLowerCase().includes(searchTerm.toLowerCase())
   );
 
   const sorted = [...filtered].sort((a, b) => {
-    const aVal = typeof a[orderBy] === "string" ? a[orderBy].toLowerCase() : a[orderBy] ?? "";
-    const bVal = typeof b[orderBy] === "string" ? b[orderBy].toLowerCase() : b[orderBy] ?? "";
-    if (aVal < bVal) return orderDirection === "asc" ? -1 : 1;
-    if (aVal > bVal) return orderDirection === "asc" ? 1 : -1;
+    const aVal = typeof a[orderBy] === 'string' ? a[orderBy].toLowerCase() : (a[orderBy] ?? '');
+    const bVal = typeof b[orderBy] === 'string' ? b[orderBy].toLowerCase() : (b[orderBy] ?? '');
+    if (aVal < bVal) return orderDirection === 'asc' ? -1 : 1;
+    if (aVal > bVal) return orderDirection === 'asc' ? 1 : -1;
     return 0;
   });
 
+  const filterUniqueByName = (arr) => {
+    const seen = new Set();
+    return arr.filter((item) => {
+      const name = item.courseName?.trim().toLowerCase();
+      if (seen.has(name)) return false;
+      seen.add(name);
+      return true;
+    });
+  };
+
   return (
-    <Box sx={{ maxWidth: 960, mx: "auto", mt: 4, px: 2 }}>
-      <Typography
-        variant="h4"
-        align="center"
-        gutterBottom
-        sx={{ fontFamily: "Assistant", fontWeight: "bold" }}
-      >
-        {isManagement ? "Manage Courses" : "My Courses"}
+    <Box sx={{ maxWidth: 960, mx: 'auto', mt: 4, px: 2 }}>
+      <Typography variant="h4" align="center" gutterBottom sx={{ fontFamily: 'Assistant', fontWeight: 'bold' }}>
+        {isManagement ? 'Manage Courses' : 'My Courses'}
       </Typography>
 
       <TextField
@@ -133,19 +132,23 @@ export default function CoursesTable() {
       />
 
       {loading ? (
-        <Box sx={{ textAlign: "center", mt: 4 }}>
+        <Box sx={{ textAlign: 'center', mt: 4 }}>
           <CircularProgress />
         </Box>
+      ) : courses.length === 0 ? (
+        <Typography align="center" sx={{ mt: 4, color: '#999', fontStyle: 'italic' }}>
+          No courses found.
+        </Typography>
       ) : (
         <TableContainer component={Paper}>
           <Table>
             <TableHead>
-              <TableRow sx={{ backgroundColor: "#eee" }}>
-                {["courseName", "lecturer", "year", "semester"].map((col) => (
+              <TableRow sx={{ backgroundColor: '#eee' }}>
+                {['courseName', 'lecturer', 'year', 'semester'].map((col) => (
                   <TableCell key={col}>
                     <TableSortLabel
                       active={orderBy === col}
-                      direction={orderBy === col ? orderDirection : "asc"}
+                      direction={orderBy === col ? orderDirection : 'asc'}
                       onClick={() => handleSort(col)}
                     >
                       {col.charAt(0).toUpperCase() + col.slice(1)}
@@ -163,7 +166,7 @@ export default function CoursesTable() {
                   onSave={handleSaveNewCourse}
                 />
               )}
-              {sorted.map((c) => (
+              {filterUniqueByName(sorted).map((c) => (
                 <CourseRow
                   key={c.id}
                   course={c}
@@ -183,12 +186,8 @@ export default function CoursesTable() {
       <Dialog open={openDeleteDialog} onClose={handleCancelDelete}>
         <DialogTitle>Are you sure you want to delete this course?</DialogTitle>
         <DialogActions>
-          <Button onClick={handleCancelDelete} color="primary">
-            Cancel
-          </Button>
-          <Button onClick={handleDelete} color="error" variant="contained">
-            Delete
-          </Button>
+          <Button onClick={handleCancelDelete} color="primary">Cancel</Button>
+          <Button onClick={handleDelete} color="error" variant="contained">Delete</Button>
         </DialogActions>
       </Dialog>
     </Box>

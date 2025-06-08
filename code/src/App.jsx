@@ -8,12 +8,13 @@ import HomePage from './HomePage';
 import HomeCards from './Components/HomeCards';
 import Forms from './Components/Forms';
 import CoursesForm from './Components/CoursesForm';
-import GradeForm from './Components/GradeForm';
+import GradeForm from './Components/GradesForm';
 import CoursesTable from './Components/CoursesTable';
 import GradesTable from './Components/GradesTable';
 import Management from './Components/Management';
 import CoursesManagement from './Components/CoursesManagement';
 import GradesManagement from './Components/GradesManagement';
+import GradesForm from './Components/GradesForm'; // ✅ חדש
 import Help from './Components/Help';
 import Info from './Components/Info';
 
@@ -39,7 +40,7 @@ export default function App() {
           <Route path="/management/courses" element={<CoursesTable />} />
           <Route path="/management/courses/:courseId" element={<CoursesManagement />} />
           <Route path="/management/grades" element={<GradesManagement />} />
-          <Route path="/management/grades/:gradeId" element={<GradesManagement />} />
+          <Route path="/management/grades/:gradeId" element={<GradesForm />} /> {/* ✅ חדש */}
 
           {/* Help and Info */}
           <Route path="/help" element={<Help />} />

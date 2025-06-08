@@ -1,122 +1,95 @@
-import React, { useEffect, useState } from "react";
+import React, { useState } from 'react';
 import {
   TableRow,
   TableCell,
   TextField,
   IconButton,
-  MenuItem,
-} from "@mui/material";
-import SaveIcon from "@mui/icons-material/Save";
-import { listCourses } from "../assets/firebase/Courses";
-import { addGrade } from "../assets/firebase/Grades";
+  Tooltip,
+} from '@mui/material';
+import SaveIcon from '@mui/icons-material/Save';
+import { addGrade } from '../assets/firebase/Grades';
 
 export default function AddGradeRow({ onAdd }) {
-  const [courses, setCourses] = useState([]);
-  const [newGrade, setNewGrade] = useState({
-    courseName: "",
-    lecturer: "",
-    year: "",
-    semester: "",
-    examGrade: "",
-    assignmentGrade: "",
-    finalAverage: "",
+  const [formData, setFormData] = useState({
+    courseName: '',
+    examGrade: '',
+    assignmentGrade: '',
   });
 
-  useEffect(() => {
-    listCourses()
-      .then((data) => setCourses(data))
-      .catch(console.error);
-  }, []);
-
-  // חישוב ממוצע סופי ברגע שהשדות מתעדכנים
-  useEffect(() => {
-    const exam = parseFloat(newGrade.examGrade);
-    const assignment = parseFloat(newGrade.assignmentGrade);
-
-    if (!isNaN(exam) && !isNaN(assignment)) {
-      const avg = ((exam + assignment) / 2).toFixed(1);
-      setNewGrade((prev) => ({ ...prev, finalAverage: avg }));
-    } else {
-      setNewGrade((prev) => ({ ...prev, finalAverage: "" }));
-    }
-  }, [newGrade.examGrade, newGrade.assignmentGrade]);
-
-  const handleChange = (field, value) => {
-    setNewGrade((prev) => ({ ...prev, [field]: value }));
-
-    // אם נבחר קורס – משלים גם מרצה, שנה, סמסטר
-    if (field === "courseName") {
-      const selected = courses.find((c) => c.courseName === value);
-      if (selected) {
-        setNewGrade((prev) => ({
-          ...prev,
-          courseName: selected.courseName,
-          lecturer: selected.lecturer,
-          year: selected.year,
-          semester: selected.semester,
-        }));
-      }
-    }
+  const handleChange = (e) => {
+    const { name, value } = e.target;
+    setFormData((prev) => ({ ...prev, [name]: value }));
   };
 
   const handleSave = async () => {
-    if (!newGrade.courseName || isNaN(newGrade.finalAverage)) return;
+    const { courseName, examGrade, assignmentGrade } = formData;
+    if (!courseName || !examGrade || !assignmentGrade) return;
 
-    const id = await addGrade(newGrade);
-    onAdd({ id, ...newGrade });
+    const finalAverage = ((Number(examGrade) + Number(assignmentGrade)) / 2).toFixed(1);
 
-    setNewGrade({
-      courseName: "",
-      lecturer: "",
-      year: "",
-      semester: "",
-      examGrade: "",
-      assignmentGrade: "",
-      finalAverage: "",
-    });
+    const newGrade = {
+      courseName,
+      examGrade: Number(examGrade),
+      assignmentGrade: Number(assignmentGrade),
+      finalAverage: Number(finalAverage),
+    };
+
+    const added = await addGrade(newGrade);
+    if (added) {
+      onAdd({ ...newGrade, id: added.id });
+      setFormData({ courseName: '', examGrade: '', assignmentGrade: '' });
+    }
   };
+
+  const finalAverage = (
+    formData.examGrade && formData.assignmentGrade
+      ? ((Number(formData.examGrade) + Number(formData.assignmentGrade)) / 2).toFixed(1)
+      : ''
+  );
 
   return (
     <TableRow>
-      <TableCell>
+      <TableCell sx={{ minWidth: 180 }}>
         <TextField
-          select
+          name="courseName"
+          value={formData.courseName}
+          onChange={handleChange}
+          placeholder="Course Name"
           size="small"
-          value={newGrade.courseName}
-          onChange={(e) => handleChange("courseName", e.target.value)}
           fullWidth
-        >
-          {courses.map((c) => (
-            <MenuItem key={c.id} value={c.courseName}>
-              {c.courseName}
-            </MenuItem>
-          ))}
-        </TextField>
-      </TableCell>
-      <TableCell>{newGrade.lecturer}</TableCell>
-      <TableCell>{newGrade.year}</TableCell>
-      <TableCell>{newGrade.semester}</TableCell>
-      <TableCell>
-        <TextField
-          size="small"
-          type="number"
-          value={newGrade.examGrade}
-          onChange={(e) => handleChange("examGrade", e.target.value)}
         />
       </TableCell>
-      <TableCell>
+      <TableCell sx={{ minWidth: 120 }}>
         <TextField
-          size="small"
+          name="examGrade"
           type="number"
-          value={newGrade.assignmentGrade}
-          onChange={(e) => handleChange("assignmentGrade", e.target.value)}
+          value={formData.examGrade}
+          onChange={handleChange}
+          placeholder="Exam Grade"
+          size="small"
+          fullWidth
         />
       </TableCell>
-      <TableCell>{newGrade.finalAverage || "N/A"}</TableCell>
-      <TableCell>
-        <IconButton onClick={handleSave} color="primary">
-          <SaveIcon />
-        </IconButton>
+      <TableCell sx={{ minWidth: 150 }}>
+        <TextField
+          name="assignmentGrade"
+          type="number"
+          value={formData.assignmentGrade}
+          onChange={handleChange}
+          placeholder="Assignment Grade"
+          size="small"
+          fullWidth
+        />
+      </TableCell>
+      <TableCell sx={{ minWidth: 130 }}>
+        {finalAverage}
+      </TableCell>
+      <TableCell sx={{ minWidth: 100 }}>
+        <Tooltip title="Save Grade">
+          <IconButton onClick={handleSave} color="primary">
+            <SaveIcon />
+          </IconButton>
+        </Tooltip>
       </TableCell>
     </TableRow>
   );

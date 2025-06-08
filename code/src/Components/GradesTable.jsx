@@ -1,8 +1,7 @@
-import React, { useState, useEffect } from "react";
+import React, { useEffect, useState } from 'react';
 import {
   Box,
   Typography,
-  TextField,
   Table,
   TableBody,
   TableCell,
@@ -10,27 +9,32 @@ import {
   TableHead,
   TableRow,
   Paper,
+  TextField,
   TableSortLabel,
-  CircularProgress,
-} from "@mui/material";
-import { listGrades } from "../assets/firebase/Grades";
-import GradeRow from "./GradeRow";
-import GradeDialog from "./GradeDialog";
+} from '@mui/material';
+import { listGrades } from '../assets/firebase/Grades';
 
 export default function GradesTable() {
   const [grades, setGrades] = useState([]);
-  const [loading, setLoading] = useState(true);
-  const [searchTerm, setSearchTerm] = useState("");
-  const [orderBy, setOrderBy] = useState("courseName");
-  const [orderDirection, setOrderDirection] = useState("asc");
-  const [selectedGrade, setSelectedGrade] = useState(null);
-  const [open, setOpen] = useState(false);
+  const [searchTerm, setSearchTerm] = useState('');
+  const [sortColumn, setSortColumn] = useState('courseName');
+  const [sortDirection, setSortDirection] = useState('asc');
 
   useEffect(() => {
     let mounted = true;
     const load = async () => {
       const data = await listGrades();
-      if (mounted) setGrades(data);
+      if (mounted) {
+        const unique = [];
+        const seen = new Set();
+        for (const g of data) {
+          if (!seen.has(g.courseName)) {
+            unique.push(g);
+            seen.add(g.courseName);
+          }
+        }
+        setGrades(unique);
+      }
     };
     load();
     return () => {
@@ -38,42 +42,30 @@ export default function GradesTable() {
     };
   }, []);
 
-  const handleSort = (field) => {
-    const isAsc = orderBy === field && orderDirection === "asc";
-    setOrderDirection(isAsc ? "desc" : "asc");
-    setOrderBy(field);
+  const handleSort = (column) => {
+    const isAsc = sortColumn === column && sortDirection === 'asc';
+    setSortColumn(column);
+    setSortDirection(isAsc ? 'desc' : 'asc');
   };
 
-  const handleOpenDialog = (grade) => {
-    setSelectedGrade(grade);
-    setOpen(true);
-  };
-
-  const handleCloseDialog = () => {
-    setSelectedGrade(null);
-    setOpen(false);
-  };
-
-  const filtered = grades.filter((g) =>
-    Object.values(g).join(" ").toLowerCase().includes(searchTerm.toLowerCase())
-  );
-
-  const sorted = [...filtered].sort((a, b) => {
-    const aVal = typeof a[orderBy] === "string" ? a[orderBy].toLowerCase() : a[orderBy] ?? "";
-    const bVal = typeof b[orderBy] === "string" ? b[orderBy].toLowerCase() : b[orderBy] ?? "";
-    if (aVal < bVal) return orderDirection === "asc" ? -1 : 1;
-    if (aVal > bVal) return orderDirection === "asc" ? 1 : -1;
-    return 0;
+  const sorted = [...grades].sort((a, b) => {
+    if (typeof a[sortColumn] === 'number') {
+      return sortDirection === 'asc'
+        ? a[sortColumn] - b[sortColumn]
+        : b[sortColumn] - a[sortColumn];
+    }
+    return sortDirection === 'asc'
+      ? a[sortColumn].localeCompare(b[sortColumn])
+      : b[sortColumn].localeCompare(a[sortColumn]);
   });
 
+  const filtered = sorted.filter((g) =>
+    Object.values(g).join(' ').toLowerCase().includes(searchTerm.toLowerCase())
+  );
+
   return (
-    <Box sx={{ maxWidth: 960, mx: "auto", mt: 4, px: 2 }}>
-      <Typography
-        variant="h4"
-        align="center"
-        gutterBottom
-        sx={{ fontFamily: "Assistant", fontWeight: "bold" }}
-      >
+    <Box sx={{ maxWidth: 1100, mx: 'auto', mt: 4, px: 2 }}>
+      <Typography variant="h4" align="center" gutterBottom sx={{ fontFamily: 'Assistant', fontWeight: 'bold' }}>
         My Grades
       </Typography>
 
@@ -86,40 +78,35 @@ export default function GradesTable() {
         onChange={(e) => setSearchTerm(e.target.value)}
       />
 
-      {loading ? (
-        <Box sx={{ textAlign: "center", mt: 4 }}>
-          <CircularProgress />
-        </Box>
-      ) : (
-        <TableContainer component={Paper}>
-          <Table>
-            <TableHead>
-              <TableRow sx={{ backgroundColor: "#eee" }}>
-                {["courseName", "lecturer", "year", "semester", "examGrade", "assignmentGrade", "finalAverage"].map(
-                  (col) => (
-                    <TableCell key={col}>
-                      <TableSortLabel
-                        active={orderBy === col}
-                        direction={orderBy === col ? orderDirection : "asc"}
-                        onClick={() => handleSort(col)}
-                      >
-                        {col.charAt(0).toUpperCase() + col.slice(1)}
-                      </TableSortLabel>
-                    </TableCell>
-                  )
-                )}
-              </TableRow>
-            </TableHead>
-            <TableBody>
-              {sorted.map((g) => (
-                <GradeRow key={g.id} grade={g} onView={handleOpenDialog} />
+      <TableContainer component={Paper}>
+        <Table>
+          <TableHead>
+            <TableRow sx={{ backgroundColor: '#f0f0f0' }}>
+              {['courseName', 'examGrade', 'assignmentGrade', 'finalAverage'].map((key) => (
+                <TableCell key={key} sx={{ fontFamily: 'Assistant', fontWeight: 'bold' }}>
+                  <TableSortLabel
+                    active={sortColumn === key}
+                    direction={sortColumn === key ? sortDirection : 'asc'}
+                    onClick={() => handleSort(key)}
+                  >
+                    {key.replace(/([A-Z])/g, ' $1').replace(/^./, (s) => s.toUpperCase())}
+                  </TableSortLabel>
+                </TableCell>
               ))}
-            </TableBody>
-          </Table>
-        </TableContainer>
-      )}
-
-      <GradeDialog open={open} onClose={handleCloseDialog} grade={selectedGrade} />
+            </TableRow>
+          </TableHead>
+          <TableBody>
+            {filtered.map((grade) => (
+              <TableRow key={grade.id}>
+                <TableCell>{grade.courseName}</TableCell>
+                <TableCell>{grade.examGrade}</TableCell>
+                <TableCell>{grade.assignmentGrade}</TableCell>
+                <TableCell>{grade.finalAverage}</TableCell>
+              </TableRow>
+            ))}
+          </TableBody>
+        </Table>
+      </TableContainer>
     </Box>
   );
 }

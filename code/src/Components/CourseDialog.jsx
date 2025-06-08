@@ -1,12 +1,5 @@
-import React, { forwardRef } from "react";
-import {
-  Dialog,
-  DialogTitle,
-  DialogContent,
-  Slide,
-  Typography,
-  Box,
-} from "@mui/material";
+import React, { forwardRef } from 'react';
+import { Dialog, DialogTitle, DialogContent, Slide, Typography, Box } from '@mui/material';
 
 const Transition = forwardRef(function Transition(props, ref) {
   return <Slide direction="down" ref={ref} {...props} />;
@@ -14,9 +7,9 @@ const Transition = forwardRef(function Transition(props, ref) {
 
 export default function CourseDialog({ open, onClose, course }) {
   const formatDate = (dateStr) => {
-    if (!dateStr) return "N/A";
+    if (!dateStr) return 'N/A';
     const date = new Date(dateStr);
-    return date.toLocaleString("en-GB");
+    return date.toLocaleString('en-GB');
   };
 
   return (
@@ -30,27 +23,27 @@ export default function CourseDialog({ open, onClose, course }) {
           borderRadius: 4,
           p: 2,
           minWidth: 380,
-          maxWidth: "90vw",
+          maxWidth: '90vw',
           boxShadow: 10,
         },
       }}
     >
       <DialogTitle
         sx={{
-          fontFamily: "Assistant",
-          fontWeight: "bold",
-          fontSize: "1.5rem",
+          fontFamily: 'Assistant',
+          fontWeight: 'bold',
+          fontSize: '1.5rem',
           pb: 1,
-          textAlign: "center",
+          textAlign: 'center',
         }}
       >
         Course Details
       </DialogTitle>
       <DialogContent
         sx={{
-          fontFamily: "Assistant",
-          display: "flex",
-          flexDirection: "column",
+          fontFamily: 'Assistant',
+          display: 'flex',
+          flexDirection: 'column',
           gap: 2,
           pt: 1,
         }}
@@ -76,11 +69,11 @@ export default function CourseDialog({ open, onClose, course }) {
               <strong>Next Assignment:</strong> {formatDate(course.nextAssignment)}
             </Typography>
             <Typography fontSize="1.1rem">
-              <strong>Final Average:</strong> {course.grades?.finalAverage ?? "N/A"}
+              <strong>Final Average:</strong> {course.grades?.finalAverage ?? 'N/A'}
             </Typography>
-            <Box sx={{ textAlign: "right", mt: 2 }}>
-              <Typography variant="caption" sx={{ color: "#999" }}>
-                ID: {course.id ?? "N/A"}
+            <Box sx={{ textAlign: 'right', mt: 2 }}>
+              <Typography variant="caption" sx={{ color: '#999' }}>
+                ID: {course.id ?? 'N/A'}
               </Typography>
             </Box>
           </>
