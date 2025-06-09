@@ -1,8 +1,21 @@
 import React, { useState, useEffect } from 'react';
 import {
-  Box, Typography, TextField, Table, TableBody, TableCell,
-  TableContainer, TableHead, TableRow, Paper, TableSortLabel,
-  CircularProgress, Dialog, DialogTitle, DialogActions, Button,
+  Box,
+  Typography,
+  TextField,
+  Table,
+  TableBody,
+  TableCell,
+  TableContainer,
+  TableHead,
+  TableRow,
+  Paper,
+  TableSortLabel,
+  CircularProgress,
+  Dialog,
+  DialogTitle,
+  DialogActions,
+  Button,
 } from '@mui/material';
 import { useNavigate, useLocation } from 'react-router-dom';
 import { listCourses, addCourse, deleteCourse } from '../assets/firebase/Courses';
@@ -39,7 +52,7 @@ export default function CoursesTable() {
         const data = await listCourses();
         if (mounted) setCourses(data);
       } catch (err) {
-        console.error("Failed to load courses:", err);
+        console.error('Failed to load courses:', err);
       } finally {
         if (mounted) setLoading(false);
       }
@@ -95,7 +108,7 @@ export default function CoursesTable() {
   };
 
   const filtered = courses.filter((c) =>
-    Object.values(c).join(' ').toLowerCase().includes(searchTerm.toLowerCase())
+    Object.values(c).join(' ').toLowerCase().includes(searchTerm.toLowerCase()),
   );
 
   const sorted = [...filtered].sort((a, b) => {
@@ -118,7 +131,12 @@ export default function CoursesTable() {
 
   return (
     <Box sx={{ maxWidth: 960, mx: 'auto', mt: 4, px: 2 }}>
-      <Typography variant="h4" align="center" gutterBottom sx={{ fontFamily: 'Assistant', fontWeight: 'bold' }}>
+      <Typography
+        variant="h4"
+        align="center"
+        gutterBottom
+        sx={{ fontFamily: 'Assistant', fontWeight: 'bold' }}
+      >
         {isManagement ? 'Manage Courses' : 'My Courses'}
       </Typography>
 
@@ -186,8 +204,12 @@ export default function CoursesTable() {
       <Dialog open={openDeleteDialog} onClose={handleCancelDelete}>
         <DialogTitle>Are you sure you want to delete this course?</DialogTitle>
         <DialogActions>
-          <Button onClick={handleCancelDelete} color="primary">Cancel</Button>
-          <Button onClick={handleDelete} color="error" variant="contained">Delete</Button>
+          <Button onClick={handleCancelDelete} color="primary">
+            Cancel
+          </Button>
+          <Button onClick={handleDelete} color="error" variant="contained">
+            Delete
+          </Button>
         </DialogActions>
       </Dialog>
     </Box>

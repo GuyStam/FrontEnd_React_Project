@@ -3,12 +3,13 @@ import {
   Box,
   Button,
   Stack,
-  TextField,
   Typography,
   Paper,
+  CircularProgress,
 } from '@mui/material';
 import { useNavigate, useParams } from 'react-router-dom';
 import { getGrade, updateGrade } from '../assets/firebase/Grades';
+import ValidatedTextField from './ValidatedTextField';
 
 export default function GradesForm() {
   const { gradeId } = useParams();
@@ -26,9 +27,9 @@ export default function GradesForm() {
       if (data) {
         setGrade(data);
         setFormData({
-          examGrade: data.examGrade ?? '',
-          assignmentGrade: data.assignmentGrade ?? '',
-          finalAverage: data.finalAverage ?? '',
+          examGrade: data.examGrade?.toString() ?? '',
+          assignmentGrade: data.assignmentGrade?.toString() ?? '',
+          finalAverage: data.finalAverage?.toString() ?? '',
         });
       }
     };
@@ -81,28 +82,36 @@ export default function GradesForm() {
         </Typography>
 
         <Stack spacing={2}>
-          <TextField
+          <ValidatedTextField
             label="Exam Grade"
             name="examGrade"
             type="number"
             value={formData.examGrade}
             onChange={handleChange}
+            required
+            validationType="number"
+            min={0}
+            max={100}
             fullWidth
           />
-          <TextField
+          <ValidatedTextField
             label="Assignment Grade"
             name="assignmentGrade"
             type="number"
             value={formData.assignmentGrade}
             onChange={handleChange}
+            required
+            validationType="number"
+            min={0}
+            max={100}
             fullWidth
           />
-          <TextField
+          <ValidatedTextField
             label="Final Average"
             name="finalAverage"
             value={formData.finalAverage}
-            fullWidth
             disabled
+            fullWidth
           />
         </Stack>
 

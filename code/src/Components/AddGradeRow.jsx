@@ -1,13 +1,8 @@
 import React, { useState } from 'react';
-import {
-  TableRow,
-  TableCell,
-  TextField,
-  IconButton,
-  Tooltip,
-} from '@mui/material';
+import { TableRow, TableCell, IconButton, Tooltip } from '@mui/material';
 import SaveIcon from '@mui/icons-material/Save';
 import { addGrade } from '../assets/firebase/Grades';
+import ValidatedTextField from './ValidatedTextField';
 
 export default function AddGradeRow({ onAdd }) {
   const [formData, setFormData] = useState({
@@ -23,9 +18,10 @@ export default function AddGradeRow({ onAdd }) {
 
   const handleSave = async () => {
     const { courseName, examGrade, assignmentGrade } = formData;
-    if (!courseName || !examGrade || !assignmentGrade) return;
 
-    const finalAverage = ((Number(examGrade) + Number(assignmentGrade)) / 2).toFixed(1);
+    const finalAverage = (
+      (Number(examGrade) + Number(assignmentGrade)) / 2
+    ).toFixed(1);
 
     const newGrade = {
       courseName,
@@ -41,48 +37,58 @@ export default function AddGradeRow({ onAdd }) {
     }
   };
 
-  const finalAverage = (
+  const finalAverage =
     formData.examGrade && formData.assignmentGrade
       ? ((Number(formData.examGrade) + Number(formData.assignmentGrade)) / 2).toFixed(1)
-      : ''
-  );
+      : '';
 
   return (
     <TableRow>
       <TableCell sx={{ minWidth: 180 }}>
-        <TextField
+        <ValidatedTextField
           name="courseName"
+          label="Course Name"
           value={formData.courseName}
           onChange={handleChange}
-          placeholder="Course Name"
-          size="small"
+          required
+          validationType="text"
+          minLength={2}
           fullWidth
+          size="small"
         />
       </TableCell>
       <TableCell sx={{ minWidth: 120 }}>
-        <TextField
+        <ValidatedTextField
           name="examGrade"
+          label="Exam Grade"
           type="number"
           value={formData.examGrade}
           onChange={handleChange}
-          placeholder="Exam Grade"
-          size="small"
+          required
+          validationType="number"
+          min={0}
+          max={100}
           fullWidth
+          size="small"
         />
       </TableCell>
       <TableCell sx={{ minWidth: 150 }}>
-        <TextField
+        <ValidatedTextField
           name="assignmentGrade"
+          label="Assignment Grade"
           type="number"
           value={formData.assignmentGrade}
           onChange={handleChange}
-          placeholder="Assignment Grade"
-          size="small"
+          required
+          validationType="number"
+          min={0}
+          max={100}
           fullWidth
+          size="small"
         />
       </TableCell>
       <TableCell sx={{ minWidth: 130 }}>
-        {finalAverage}
+        {finalAverage || '-'}
       </TableCell>
       <TableCell sx={{ minWidth: 100 }}>
         <Tooltip title="Save Grade">

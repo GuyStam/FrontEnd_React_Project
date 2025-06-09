@@ -1,37 +1,22 @@
 import React, { useState, useEffect } from 'react';
 import {
-  Card,
-  CardContent,
-  Typography,
-  Box,
-  Button,
-  Dialog,
-  DialogTitle,
-  DialogContent,
-  DialogActions,
-  TextField,
-  Stack,
-  Avatar,
-  CircularProgress,
+  Card, CardContent, Typography, Box, Button, Dialog,
+  DialogTitle, DialogContent, DialogActions, Stack,
+  Avatar, CircularProgress
 } from '@mui/material';
 import AssignmentIcon from '@mui/icons-material/Assignment';
 import { getStudentInfo, setStudentInfo } from '../assets/firebase/student';
+import ValidatedTextField from './ValidatedTextField';
 
 export default function InfoBox() {
   const [info, setInfo] = useState({
-    fullName: '',
-    email: '',
-    phone: '',
-    address: '',
-    idNumber: '',
-    profilePicture: '',
+    fullName: '', email: '', phone: '', address: '', idNumber: '', profilePicture: '',
   });
   const [open, setOpen] = useState(false);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
     const loadInfo = async () => {
-      setLoading(true);
       const saved = await getStudentInfo();
       if (saved) setInfo(saved);
       setLoading(false);
@@ -56,10 +41,6 @@ export default function InfoBox() {
   };
 
   const handleSave = async () => {
-    if (info.idNumber.length !== 9 || isNaN(info.idNumber)) {
-      alert('ID must be exactly 9 digits.');
-      return;
-    }
     setLoading(true);
     await setStudentInfo(info);
     setLoading(false);
@@ -67,11 +48,7 @@ export default function InfoBox() {
   };
 
   if (loading) {
-    return (
-      <Box sx={{ display: 'flex', justifyContent: 'center', mt: 4 }}>
-        <CircularProgress />
-      </Box>
-    );
+    return <Box sx={{ display: 'flex', justifyContent: 'center', mt: 4 }}><CircularProgress /></Box>;
   }
 
   return (
@@ -98,21 +75,11 @@ export default function InfoBox() {
         </Button>
 
         <Stack spacing={1} sx={{ fontFamily: 'Assistant', color: '#555' }}>
-          <Typography>
-            <b>Name:</b> {info.fullName || '-'}
-          </Typography>
-          <Typography>
-            <b>Email:</b> {info.email || '-'}
-          </Typography>
-          <Typography>
-            <b>Address:</b> {info.address || '-'}
-          </Typography>
-          <Typography>
-            <b>Phone:</b> {info.phone || '-'}
-          </Typography>
-          <Typography>
-            <b>ID Number:</b> {info.idNumber || '-'}
-          </Typography>
+          <Typography><b>Name:</b> {info.fullName || '-'}</Typography>
+          <Typography><b>Email:</b> {info.email || '-'}</Typography>
+          <Typography><b>Address:</b> {info.address || '-'}</Typography>
+          <Typography><b>Phone:</b> {info.phone || '-'}</Typography>
+          <Typography><b>ID Number:</b> {info.idNumber || '-'}</Typography>
         </Stack>
 
         <Dialog open={open} onClose={() => setOpen(false)}>
@@ -121,41 +88,52 @@ export default function InfoBox() {
           </DialogTitle>
           <DialogContent>
             <Stack spacing={2} sx={{ mt: 1 }}>
-              <TextField
+              <ValidatedTextField
                 name="fullName"
                 label="Full Name"
                 value={info.fullName}
                 onChange={handleChange}
+                required
+                validationType="text"
+                minLength={3}
                 fullWidth
               />
-              <TextField
+              <ValidatedTextField
                 name="email"
                 label="Email"
-                type="email"
                 value={info.email}
                 onChange={handleChange}
+                required
+                validationType="email"
                 fullWidth
               />
-              <TextField
+              <ValidatedTextField
                 name="phone"
                 label="Phone"
                 value={info.phone}
                 onChange={handleChange}
+                required
+                validationType="number"
+                minLength={9}
+                maxLength={10}
                 fullWidth
               />
-              <TextField
+              <ValidatedTextField
                 name="address"
                 label="Address"
                 value={info.address}
                 onChange={handleChange}
                 fullWidth
               />
-              <TextField
+              <ValidatedTextField
                 name="idNumber"
                 label="ID Number (9 digits)"
                 value={info.idNumber}
                 onChange={handleChange}
-                inputProps={{ maxLength: 9 }}
+                required
+                validationType="number"
+                minLength={9}
+                maxLength={9}
                 fullWidth
               />
               <Button

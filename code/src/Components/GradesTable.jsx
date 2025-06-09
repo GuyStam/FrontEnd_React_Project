@@ -60,12 +60,17 @@ export default function GradesTable() {
   });
 
   const filtered = sorted.filter((g) =>
-    Object.values(g).join(' ').toLowerCase().includes(searchTerm.toLowerCase())
+    Object.values(g).join(' ').toLowerCase().includes(searchTerm.toLowerCase()),
   );
 
   return (
     <Box sx={{ maxWidth: 1100, mx: 'auto', mt: 4, px: 2 }}>
-      <Typography variant="h4" align="center" gutterBottom sx={{ fontFamily: 'Assistant', fontWeight: 'bold' }}>
+      <Typography
+        variant="h4"
+        align="center"
+        gutterBottom
+        sx={{ fontFamily: 'Assistant', fontWeight: 'bold' }}
+      >
         My Grades
       </Typography>
 

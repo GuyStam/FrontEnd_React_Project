@@ -1,7 +1,17 @@
 import React, { useState, useEffect } from 'react';
-import { Box, TextField, Button, Typography, CircularProgress } from '@mui/material';
+import {
+  Box,
+  TextField,
+  Button,
+  Typography,
+  CircularProgress,
+  MenuItem,
+} from '@mui/material';
 import { useParams, useNavigate } from 'react-router-dom';
 import { getCourse, updateCourse } from '../assets/firebase/Courses';
+import ValidatedTextField from './ValidatedTextField';
+
+const semesters = ['A', 'B', 'Summer'];
 
 export default function CoursesManagement() {
   const { courseId } = useParams();
@@ -79,7 +89,11 @@ export default function CoursesManagement() {
   }
 
   return (
-    <Box component="form" onSubmit={handleSubmit} sx={{ maxWidth: 600, mx: 'auto', mt: 4 }}>
+    <Box
+      component="form"
+      onSubmit={handleSubmit}
+      sx={{ maxWidth: 600, mx: 'auto', mt: 4 }}
+    >
       <Typography
         variant="h4"
         align="center"
@@ -89,39 +103,58 @@ export default function CoursesManagement() {
         Edit Course
       </Typography>
 
-      <TextField
+      <ValidatedTextField
         fullWidth
         margin="normal"
         label="Course Name"
         name="courseName"
         value={values.courseName}
         onChange={handleChange}
+        required
+        validationType="text"
+        minLength={2}
       />
-      <TextField
+      <ValidatedTextField
         fullWidth
         margin="normal"
         label="Lecturer"
         name="lecturer"
         value={values.lecturer}
         onChange={handleChange}
+        required
+        validationType="text"
+        minLength={3}
       />
-      <TextField
+      <ValidatedTextField
         fullWidth
         margin="normal"
         label="Year"
         name="year"
+        type="number"
         value={values.year}
         onChange={handleChange}
+        required
+        validationType="number"
+        min={2000}
+        max={2100}
       />
-      <TextField
+      <ValidatedTextField
         fullWidth
         margin="normal"
+        select
         label="Semester"
         name="semester"
         value={values.semester}
         onChange={handleChange}
-      />
-      <TextField
+        required
+      >
+        {semesters.map((option) => (
+          <MenuItem key={option} value={option}>
+            {option}
+          </MenuItem>
+        ))}
+      </ValidatedTextField>
+      <ValidatedTextField
         fullWidth
         margin="normal"
         label="Next Class"
@@ -129,7 +162,7 @@ export default function CoursesManagement() {
         value={values.nextClass}
         onChange={handleChange}
       />
-      <TextField
+      <ValidatedTextField
         fullWidth
         margin="normal"
         label="Next Assignment"
@@ -137,13 +170,15 @@ export default function CoursesManagement() {
         value={values.nextAssignment}
         onChange={handleChange}
       />
-      <TextField
+      <ValidatedTextField
         fullWidth
         margin="normal"
         label="Final Average"
         name="finalAverage"
         value={values.grades.finalAverage}
         onChange={handleChange}
+        validationType="number"
+        disabled
       />
 
       <Button type="submit" variant="contained" color="primary" sx={{ mt: 3 }}>

@@ -69,9 +69,7 @@ export default function GradesManagement() {
 
   const filtered = filterUniqueByCourseName(
     grades
-      .filter((g) =>
-        Object.values(g).join(' ').toLowerCase().includes(searchTerm.toLowerCase())
-      )
+      .filter((g) => Object.values(g).join(' ').toLowerCase().includes(searchTerm.toLowerCase()))
       .sort((a, b) => {
         if (typeof a[sortColumn] === 'number') {
           return sortDirection === 'asc'
@@ -81,12 +79,17 @@ export default function GradesManagement() {
         return sortDirection === 'asc'
           ? a[sortColumn].localeCompare(b[sortColumn])
           : b[sortColumn].localeCompare(a[sortColumn]);
-      })
+      }),
   );
 
   return (
     <Box sx={{ maxWidth: 1100, mx: 'auto', mt: 4, px: 2 }}>
-      <Typography variant="h4" align="center" gutterBottom sx={{ fontFamily: 'Assistant', fontWeight: 'bold' }}>
+      <Typography
+        variant="h4"
+        align="center"
+        gutterBottom
+        sx={{ fontFamily: 'Assistant', fontWeight: 'bold' }}
+      >
         Grades Management
       </Typography>
 
@@ -103,32 +106,29 @@ export default function GradesManagement() {
         <Table>
           <TableHead>
             <TableRow sx={{ backgroundColor: '#f0f0f0' }}>
-              {['courseName', 'examGrade', 'assignmentGrade', 'finalAverage', 'Actions'].map((label) => (
-                <TableCell key={label} sx={{ fontFamily: 'Assistant', fontWeight: 'bold' }}>
-                  {label !== 'Actions' ? (
-                    <TableSortLabel
-                      active={sortColumn === label}
-                      direction={sortColumn === label ? sortDirection : 'asc'}
-                      onClick={() => handleSort(label)}
-                    >
-                      {label.replace(/([A-Z])/g, ' $1').replace(/^./, (s) => s.toUpperCase())}
-                    </TableSortLabel>
-                  ) : (
-                    'Actions'
-                  )}
-                </TableCell>
-              ))}
+              {['courseName', 'examGrade', 'assignmentGrade', 'finalAverage', 'Actions'].map(
+                (label) => (
+                  <TableCell key={label} sx={{ fontFamily: 'Assistant', fontWeight: 'bold' }}>
+                    {label !== 'Actions' ? (
+                      <TableSortLabel
+                        active={sortColumn === label}
+                        direction={sortColumn === label ? sortDirection : 'asc'}
+                        onClick={() => handleSort(label)}
+                      >
+                        {label.replace(/([A-Z])/g, ' $1').replace(/^./, (s) => s.toUpperCase())}
+                      </TableSortLabel>
+                    ) : (
+                      'Actions'
+                    )}
+                  </TableCell>
+                ),
+              )}
             </TableRow>
           </TableHead>
           <TableBody>
             <AddGradeRow onAdd={handleAdd} />
             {filtered.map((grade) => (
-              <GradeRow
-                key={grade.id}
-                grade={grade}
-                onDelete={handleDelete}
-                onEdit={handleEdit}
-              />
+              <GradeRow key={grade.id} grade={grade} onDelete={handleDelete} onEdit={handleEdit} />
             ))}
           </TableBody>
         </Table>

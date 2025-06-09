@@ -21,16 +21,16 @@ function getRandomGrade(min = 60, max = 100) {
 }
 
 const seedCourses = [
-  { courseName: "Database Systems", lecturer: "Ms. Mor", year: 2024, semester: "B" },
-  { courseName: "Business Statistics", lecturer: "Dr. Shapiro", year: 2024, semester: "A" },
-  { courseName: "ERP Systems", lecturer: "Dr. Regev", year: 2026, semester: "B" },
-  { courseName: "E-Business", lecturer: "Mr. Daniel", year: 2026, semester: "Summer" },
-  { courseName: "Financial Accounting", lecturer: "Dr. Bar", year: 2025, semester: "A" },
-  { courseName: "Information Systems Intro", lecturer: "Dr. Cohen", year: 2023, semester: "A" },
-  { courseName: "Marketing Principles", lecturer: "Mr. Yaron", year: 2025, semester: "Summer" },
-  { courseName: "Microeconomics", lecturer: "Prof. Levi", year: 2023, semester: "B" },
-  { courseName: "Network Fundamentals", lecturer: "Ms. Tal", year: 2025, semester: "B" },
-  { courseName: "Project Management", lecturer: "Prof. Alon", year: 2026, semester: "A" },
+  { courseName: 'Database Systems', lecturer: 'Ms. Mor', year: 2024, semester: 'B' },
+  { courseName: 'Business Statistics', lecturer: 'Dr. Shapiro', year: 2024, semester: 'A' },
+  { courseName: 'ERP Systems', lecturer: 'Dr. Regev', year: 2026, semester: 'B' },
+  { courseName: 'E-Business', lecturer: 'Mr. Daniel', year: 2026, semester: 'Summer' },
+  { courseName: 'Financial Accounting', lecturer: 'Dr. Bar', year: 2025, semester: 'A' },
+  { courseName: 'Information Systems Intro', lecturer: 'Dr. Cohen', year: 2023, semester: 'A' },
+  { courseName: 'Marketing Principles', lecturer: 'Mr. Yaron', year: 2025, semester: 'Summer' },
+  { courseName: 'Microeconomics', lecturer: 'Prof. Levi', year: 2023, semester: 'B' },
+  { courseName: 'Network Fundamentals', lecturer: 'Ms. Tal', year: 2025, semester: 'B' },
+  { courseName: 'Project Management', lecturer: 'Prof. Alon', year: 2026, semester: 'A' },
 ];
 
 export async function addCourse(course) {
