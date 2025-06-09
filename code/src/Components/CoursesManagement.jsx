@@ -10,6 +10,8 @@ import {
 import { useParams, useNavigate } from 'react-router-dom';
 import { getCourse, updateCourse } from '../assets/firebase/Courses';
 import ValidatedTextField from './ValidatedTextField';
+import { LocalizationProvider, DateTimePicker } from '@mui/x-date-pickers';
+import { AdapterDateFns } from '@mui/x-date-pickers/AdapterDateFns';
 
 const semesters = ['A', 'B', 'Summer'];
 
@@ -67,6 +69,13 @@ export default function CoursesManagement() {
     }
   };
 
+  const handleDateChange = (name, newValue) => {
+    setValues((prev) => ({
+      ...prev,
+      [name]: newValue ? new Date(newValue).toISOString() : '',
+    }));
+  };
+
   const handleSubmit = async (e) => {
     e.preventDefault();
     setLoading(true);
@@ -89,101 +98,106 @@ export default function CoursesManagement() {
   }
 
   return (
-    <Box
-      component="form"
-      onSubmit={handleSubmit}
-      sx={{ maxWidth: 600, mx: 'auto', mt: 4 }}
-    >
-      <Typography
-        variant="h4"
-        align="center"
-        gutterBottom
-        sx={{ fontFamily: 'Assistant', fontWeight: 'bold' }}
+    <LocalizationProvider dateAdapter={AdapterDateFns}>
+      <Box
+        component="form"
+        onSubmit={handleSubmit}
+        sx={{ maxWidth: 600, mx: 'auto', mt: 4 }}
       >
-        Edit Course
-      </Typography>
+        <Typography
+          variant="h4"
+          align="center"
+          gutterBottom
+          sx={{ fontFamily: 'Assistant', fontWeight: 'bold' }}
+        >
+          Edit Course
+        </Typography>
 
-      <ValidatedTextField
-        fullWidth
-        margin="normal"
-        label="Course Name"
-        name="courseName"
-        value={values.courseName}
-        onChange={handleChange}
-        required
-        validationType="text"
-        minLength={2}
-      />
-      <ValidatedTextField
-        fullWidth
-        margin="normal"
-        label="Lecturer"
-        name="lecturer"
-        value={values.lecturer}
-        onChange={handleChange}
-        required
-        validationType="text"
-        minLength={3}
-      />
-      <ValidatedTextField
-        fullWidth
-        margin="normal"
-        label="Year"
-        name="year"
-        type="number"
-        value={values.year}
-        onChange={handleChange}
-        required
-        validationType="number"
-        min={2000}
-        max={2100}
-      />
-      <ValidatedTextField
-        fullWidth
-        margin="normal"
-        select
-        label="Semester"
-        name="semester"
-        value={values.semester}
-        onChange={handleChange}
-        required
-      >
-        {semesters.map((option) => (
-          <MenuItem key={option} value={option}>
-            {option}
-          </MenuItem>
-        ))}
-      </ValidatedTextField>
-      <ValidatedTextField
-        fullWidth
-        margin="normal"
-        label="Next Class"
-        name="nextClass"
-        value={values.nextClass}
-        onChange={handleChange}
-      />
-      <ValidatedTextField
-        fullWidth
-        margin="normal"
-        label="Next Assignment"
-        name="nextAssignment"
-        value={values.nextAssignment}
-        onChange={handleChange}
-      />
-      <ValidatedTextField
-        fullWidth
-        margin="normal"
-        label="Final Average"
-        name="finalAverage"
-        value={values.grades.finalAverage}
-        onChange={handleChange}
-        validationType="number"
-        disabled
-      />
+        <ValidatedTextField
+          fullWidth
+          margin="normal"
+          label="Course Name"
+          name="courseName"
+          value={values.courseName}
+          onChange={handleChange}
+          required
+          validationType="text"
+          minLength={2}
+        />
+        <ValidatedTextField
+          fullWidth
+          margin="normal"
+          label="Lecturer"
+          name="lecturer"
+          value={values.lecturer}
+          onChange={handleChange}
+          required
+          validationType="text"
+          minLength={3}
+        />
+        <ValidatedTextField
+          fullWidth
+          margin="normal"
+          label="Year"
+          name="year"
+          type="number"
+          value={values.year}
+          onChange={handleChange}
+          required
+          validationType="number"
+          min={2000}
+          max={2100}
+        />
+        <ValidatedTextField
+          fullWidth
+          margin="normal"
+          select
+          label="Semester"
+          name="semester"
+          value={values.semester}
+          onChange={handleChange}
+          required
+        >
+          {semesters.map((option) => (
+            <MenuItem key={option} value={option}>
+              {option}
+            </MenuItem>
+          ))}
+        </ValidatedTextField>
 
-      <Button type="submit" variant="contained" color="primary" sx={{ mt: 3 }}>
-        Save
-      </Button>
-    </Box>
+        <DateTimePicker
+          label="Next Class"
+          value={values.nextClass ? new Date(values.nextClass) : null}
+          onChange={(newValue) => handleDateChange('nextClass', newValue)}
+          renderInput={(params) => (
+            <TextField fullWidth margin="normal" {...params} />
+          )}
+        />
+
+        <DateTimePicker
+          label="Next Assignment"
+          value={values.nextAssignment ? new Date(values.nextAssignment) : null}
+          onChange={(newValue) => handleDateChange('nextAssignment', newValue)}
+          renderInput={(params) => (
+            <TextField fullWidth margin="normal" {...params} />
+          )}
+        />
+
+        <ValidatedTextField
+          fullWidth
+          margin="normal"
+          label="Final Average"
+          name="finalAverage"
+          value={values.grades.finalAverage}
+          onChange={handleChange}
+          validationType="number"
+          disabled
+        />
+
+        <Button type="submit" variant="contained" color="primary" sx={{ mt: 3 }}>
+          Save
+        </Button>
+      </Box>
+    </LocalizationProvider>
   );
 }

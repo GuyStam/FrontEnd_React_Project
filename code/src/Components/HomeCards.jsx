@@ -6,6 +6,18 @@ import CalendarTodayIcon from '@mui/icons-material/CalendarToday';
 import TimerIcon from '@mui/icons-material/Timer';
 import MessageIcon from '@mui/icons-material/Message';
 
+const formatDate = (isoString) => {
+  if (!isoString) return "N/A";
+  const date = new Date(isoString);
+  return date.toLocaleString("en-GB", {
+    day: "2-digit",
+    month: "2-digit",
+    year: "numeric",
+    hour: "2-digit",
+    minute: "2-digit"
+  }).replace(",", ""); // הסרת פסיק מיותר
+};
+
 const HomeCards = ({ nextAssignment, averageGPA, sinceStart, untilEnd, lecturerMessage }) => {
   return (
     <Box sx={{ padding: 3 }}>
@@ -31,7 +43,7 @@ const HomeCards = ({ nextAssignment, averageGPA, sinceStart, untilEnd, lecturerM
               Upcoming Assignments
             </Typography>
             <Typography sx={{ textAlign: 'center', color: 'white' }}>
-              {nextAssignment ? `Next due: ${nextAssignment}` : 'None'}
+              {nextAssignment ? `Next due: ${formatDate(nextAssignment)}` : 'None'}
             </Typography>
           </Paper>
         </Grid>
@@ -83,7 +95,7 @@ const HomeCards = ({ nextAssignment, averageGPA, sinceStart, untilEnd, lecturerM
               Upcoming Exams
             </Typography>
             <Typography sx={{ textAlign: 'center', color: 'white' }}>
-              {nextAssignment ? `Exam on: ${nextAssignment}` : 'None'}
+              {nextAssignment ? `Exam on: ${formatDate(nextAssignment)}` : 'None'}
             </Typography>
           </Paper>
         </Grid>

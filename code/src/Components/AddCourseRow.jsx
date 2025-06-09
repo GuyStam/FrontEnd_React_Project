@@ -1,7 +1,9 @@
 import React from 'react';
-import { TableCell, TableRow, IconButton, MenuItem } from '@mui/material';
+import { TableCell, TableRow, IconButton, MenuItem, TextField } from '@mui/material';
 import SaveIcon from '@mui/icons-material/Save';
 import ValidatedTextField from './ValidatedTextField';
+import { LocalizationProvider, DateTimePicker } from '@mui/x-date-pickers';
+import { AdapterDateFns } from '@mui/x-date-pickers/AdapterDateFns';
 
 const semesters = ['A', 'B', 'Summer'];
 
@@ -11,72 +13,97 @@ export default function AddCourseRow({ newCourse, setNewCourse, onSave }) {
     setNewCourse((prev) => ({ ...prev, [name]: value }));
   };
 
+  const handleDateChange = (name, newValue) => {
+    setNewCourse((prev) => ({
+      ...prev,
+      [name]: newValue ? new Date(newValue).toISOString() : '',
+    }));
+  };
+
   return (
-    <TableRow>
-      <TableCell>
-        <ValidatedTextField
-          name="courseName"
-          label="Course Name"
-          value={newCourse.courseName}
-          onChange={handleChange}
-          required
-          validationType="text"
-          minLength={2}
-          fullWidth
-          size="small"
-        />
-      </TableCell>
-      <TableCell>
-        <ValidatedTextField
-          name="lecturer"
-          label="Lecturer"
-          value={newCourse.lecturer}
-          onChange={handleChange}
-          required
-          validationType="text"
-          minLength={3}
-          fullWidth
-          size="small"
-        />
-      </TableCell>
-      <TableCell>
-        <ValidatedTextField
-          name="year"
-          label="Year"
-          type="number"
-          value={newCourse.year}
-          onChange={handleChange}
-          required
-          validationType="number"
-          min={2000}
-          max={2100}
-          fullWidth
-          size="small"
-        />
-      </TableCell>
-      <TableCell>
-        <ValidatedTextField
-          select
-          name="semester"
-          label="Semester"
-          value={newCourse.semester}
-          onChange={handleChange}
-          required
-          fullWidth
-          size="small"
-        >
-          {semesters.map((option) => (
-            <MenuItem key={option} value={option}>
-              {option}
-            </MenuItem>
-          ))}
-        </ValidatedTextField>
-      </TableCell>
-      <TableCell>
-        <IconButton onClick={onSave} color="primary">
-          <SaveIcon />
-        </IconButton>
-      </TableCell>
-    </TableRow>
+    <LocalizationProvider dateAdapter={AdapterDateFns}>
+      <TableRow>
+        <TableCell>
+          <ValidatedTextField
+            name="courseName"
+            label="Course Name"
+            value={newCourse.courseName}
+            onChange={handleChange}
+            required
+            validationType="text"
+            minLength={2}
+            fullWidth
+            size="small"
+          />
+        </TableCell>
+        <TableCell>
+          <ValidatedTextField
+            name="lecturer"
+            label="Lecturer"
+            value={newCourse.lecturer}
+            onChange={handleChange}
+            required
+            validationType="text"
+            minLength={3}
+            fullWidth
+            size="small"
+          />
+        </TableCell>
+        <TableCell>
+          <ValidatedTextField
+            name="year"
+            label="Year"
+            type="number"
+            value={newCourse.year}
+            onChange={handleChange}
+            required
+            validationType="number"
+            min={2000}
+            max={2100}
+            fullWidth
+            size="small"
+          />
+        </TableCell>
+        <TableCell>
+          <ValidatedTextField
+            select
+            name="semester"
+            label="Semester"
+            value={newCourse.semester}
+            onChange={handleChange}
+            required
+            fullWidth
+            size="small"
+          >
+            {semesters.map((option) => (
+              <MenuItem key={option} value={option}>
+                {option}
+              </MenuItem>
+            ))}
+          </ValidatedTextField>
+        </TableCell>
+        <TableCell>
+          <DateTimePicker
+            label="Next Class"
+            value={newCourse.nextClass ? new Date(newCourse.nextClass) : null}
+            onChange={(newValue) => handleDateChange('nextClass', newValue)}
+            renderInput={(params) => <TextField {...params} size="small" fullWidth />}
+          />
+        </TableCell>
+        <TableCell>
+          <DateTimePicker
+            label="Next Assignment"
+            value={newCourse.nextAssignment ? new Date(newCourse.nextAssignment) : null}
+            onChange={(newValue) => handleDateChange('nextAssignment', newValue)}
+            renderInput={(params) => <TextField {...params} size="small" fullWidth />}
+          />
+        </TableCell>
+        <TableCell>
+          <IconButton onClick={onSave} color="primary">
+            <SaveIcon />
+          </IconButton>
+        </TableCell>
+      </TableRow>
+    </LocalizationProvider>
   );
 }

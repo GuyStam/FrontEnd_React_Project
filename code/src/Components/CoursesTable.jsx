@@ -18,12 +18,17 @@ import {
   Button,
 } from '@mui/material';
 import { useNavigate, useLocation } from 'react-router-dom';
-import { listCourses, addCourse, deleteCourse } from '../assets/firebase/Courses';
+import {
+  listCourses,
+  addCourse,
+  deleteCourse,
+  seedAllCoursesIfEmpty, // ✅ נוספה שורה זו
+} from '../assets/firebase/Courses';
 import AddCourseRow from './AddCourseRow';
 import CourseRow from './CourseRow';
 import CourseDialog from './CourseDialog';
 
-export default function CoursesTable() {
+function CoursesTable() {
   const [courses, setCourses] = useState([]);
   const [loading, setLoading] = useState(true);
   const [searchTerm, setSearchTerm] = useState('');
@@ -34,6 +39,8 @@ export default function CoursesTable() {
     lecturer: '',
     year: '',
     semester: '',
+    nextClass: '',
+    nextAssignment: '',
   });
 
   const [open, setOpen] = useState(false);
@@ -50,7 +57,15 @@ export default function CoursesTable() {
     const load = async () => {
       try {
         const data = await listCourses();
-        if (mounted) setCourses(data);
+
+        if (data.length === 0) {
+          console.log('⛔ No courses found – seeding...');
+          await seedAllCoursesIfEmpty();
+          const seeded = await listCourses();
+          if (mounted) setCourses(seeded);
+        } else {
+          if (mounted) setCourses(data);
+        }
       } catch (err) {
         console.error('Failed to load courses:', err);
       } finally {
@@ -85,7 +100,14 @@ export default function CoursesTable() {
     if (newId) {
       setCourses((prev) => [...prev, { id: newId, ...newCourse }]);
     }
-    setNewCourse({ courseName: '', lecturer: '', year: '', semester: '' });
+    setNewCourse({
+      courseName: '',
+      lecturer: '',
+      year: '',
+      semester: '',
+      nextClass: '',
+      nextAssignment: '',
+    });
   };
 
   const handleOpenDeleteDialog = (course) => {
@@ -130,7 +152,7 @@ export default function CoursesTable() {
   };
 
   return (
-    <Box sx={{ maxWidth: 960, mx: 'auto', mt: 4, px: 2 }}>
+    <Box sx={{ width: '100%', mt: 4, px: 2 }}>
       <Typography
         variant="h4"
         align="center"
@@ -153,17 +175,13 @@ export default function CoursesTable() {
         <Box sx={{ textAlign: 'center', mt: 4 }}>
           <CircularProgress />
         </Box>
-      ) : courses.length === 0 ? (
-        <Typography align="center" sx={{ mt: 4, color: '#999', fontStyle: 'italic' }}>
-          No courses found.
-        </Typography>
       ) : (
         <TableContainer component={Paper}>
-          <Table>
+          <Table sx={{ tableLayout: 'fixed', minWidth: 1300 }}>
             <TableHead>
               <TableRow sx={{ backgroundColor: '#eee' }}>
                 {['courseName', 'lecturer', 'year', 'semester'].map((col) => (
-                  <TableCell key={col}>
+                  <TableCell key={col} sx={{ minWidth: 140 }}>
                     <TableSortLabel
                       active={orderBy === col}
                       direction={orderBy === col ? orderDirection : 'asc'}
@@ -173,7 +191,13 @@ export default function CoursesTable() {
                     </TableSortLabel>
                   </TableCell>
                 ))}
-                {isManagement && <TableCell>Actions</TableCell>}
+                {isManagement && (
+                  <>
+                    <TableCell sx={{ minWidth: 160 }}>Next Class</TableCell>
+                    <TableCell sx={{ minWidth: 160 }}>Next Assignment</TableCell>
+                    <TableCell sx={{ minWidth: 100 }}>Actions</TableCell>
+                  </>
+                )}
               </TableRow>
             </TableHead>
             <TableBody>
@@ -184,16 +208,24 @@ export default function CoursesTable() {
                   onSave={handleSaveNewCourse}
                 />
               )}
-              {filterUniqueByName(sorted).map((c) => (
-                <CourseRow
-                  key={c.id}
-                  course={c}
-                  isManagement={isManagement}
-                  onClick={handleOpenDialog}
-                  onDelete={handleOpenDeleteDialog}
-                  onEdit={() => navigate(`/management/courses/${c.id}`)}
-                />
-              ))}
+              {filterUniqueByName(sorted).length === 0 ? (
+                <TableRow>
+                  <TableCell colSpan={10} align="center" sx={{ color: '#999', fontStyle: 'italic' }}>
+                    No courses found.
+                  </TableCell>
+                </TableRow>
+              ) : (
+                filterUniqueByName(sorted).map((c) => (
+                  <CourseRow
+                    key={c.id}
+                    course={c}
+                    isManagement={isManagement}
+                    onClick={handleOpenDialog}
+                    onDelete={handleOpenDeleteDialog}
+                    onEdit={() => navigate(`/management/courses/${c.id}`)}
+                  />
+                ))
+              )}
             </TableBody>
           </Table>
         </TableContainer>
@@ -215,3 +247,5 @@ export default function CoursesTable() {
     </Box>
   );
 }
+
+export default CoursesTable;

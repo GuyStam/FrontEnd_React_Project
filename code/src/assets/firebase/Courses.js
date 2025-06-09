@@ -18,6 +18,29 @@ function getRandomGrade(min = 60, max = 100) {
   return Math.floor(Math.random() * (max - min + 1)) + min;
 }
 
+// ✅ מחזיר תאריך בשנה הקרובה בימי שלישי או חמישי, בשעה בין 16:00 ל־21:45 בקפיצות של 15 דקות
+function getRandomDate() {
+  const now = new Date();
+  const end = new Date();
+  end.setFullYear(end.getFullYear() + 1);
+
+  const days = [2, 4]; // 0=Sunday ... 6=Saturday → 2=Tuesday, 4=Thursday
+
+  while (true) {
+    const randomTime = now.getTime() + Math.random() * (end.getTime() - now.getTime());
+    const date = new Date(randomTime);
+    const day = date.getDay();
+
+    if (days.includes(day)) {
+      const hour = 16 + Math.floor(Math.random() * 6); // 16–21
+      const quarter = [0, 15, 30, 45];
+      const minute = quarter[Math.floor(Math.random() * quarter.length)];
+      date.setHours(hour, minute, 0, 0);
+      return date.toISOString();
+    }
+  }
+}
+
 const seedCourses = [
   { courseName: 'Database Systems', lecturer: 'Ms. Mor', year: 2024, semester: 'B' },
   { courseName: 'Business Statistics', lecturer: 'Dr. Shapiro', year: 2024, semester: 'A' },
@@ -41,8 +64,8 @@ export async function addCourse(course) {
     lecturer: course.lecturer,
     year: Number(course.year),
     semester: course.semester,
-    nextClass: course.nextClass ?? new Date().toISOString(),
-    nextAssignment: course.nextAssignment ?? new Date().toISOString(),
+    nextClass: course.nextClass ?? getRandomDate(),
+    nextAssignment: course.nextAssignment ?? getRandomDate(),
     grades: {
       finalAverage: 0,
     },
@@ -112,7 +135,6 @@ export async function deleteCourse(courseId) {
   return deleteDoc(courseRef);
 }
 
-
 export async function updateCourseByName(courseName, finalAverage) {
   const q = query(collection(firestore, COL), where('courseName', '==', courseName));
   const snapshot = await getDocs(q);
@@ -122,4 +144,13 @@ export async function updateCourseByName(courseName, finalAverage) {
       grades: { finalAverage },
     });
   });
+}
+
+export async function seedAllCoursesIfEmpty() {
+  const snapshot = await getDocs(collection(firestore, COL));
+  if (!snapshot.empty) return;
+
+  for (const course of seedCourses) {
+    await addCourse(course);
+  }
 }
