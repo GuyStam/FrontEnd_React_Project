@@ -1,7 +1,8 @@
-import React, { useState } from 'react';
-import { TableRow, TableCell, IconButton, Tooltip } from '@mui/material';
+import React, { useState, useEffect } from 'react';
+import { TableRow, TableCell, IconButton, Tooltip, MenuItem, Select } from '@mui/material';
 import SaveIcon from '@mui/icons-material/Save';
 import { addGrade } from '../assets/firebase/Grades';
+import { listCourses, updateCourseByName } from '../assets/firebase/Courses';
 import ValidatedTextField from './ValidatedTextField';
 
 export default function AddGradeRow({ onAdd }) {
@@ -10,6 +11,16 @@ export default function AddGradeRow({ onAdd }) {
     examGrade: '',
     assignmentGrade: '',
   });
+  const [courseOptions, setCourseOptions] = useState([]);
+
+  useEffect(() => {
+    const loadCourses = async () => {
+      const data = await listCourses();
+      const uniqueNames = [...new Set(data.map((c) => c.courseName))];
+      setCourseOptions(uniqueNames);
+    };
+    loadCourses();
+  }, []);
 
   const handleChange = (e) => {
     const { name, value } = e.target;
@@ -18,10 +29,9 @@ export default function AddGradeRow({ onAdd }) {
 
   const handleSave = async () => {
     const { courseName, examGrade, assignmentGrade } = formData;
+    if (!courseName || !examGrade || !assignmentGrade) return;
 
-    const finalAverage = (
-      (Number(examGrade) + Number(assignmentGrade)) / 2
-    ).toFixed(1);
+    const finalAverage = ((Number(examGrade) + Number(assignmentGrade)) / 2).toFixed(1);
 
     const newGrade = {
       courseName,
@@ -33,6 +43,10 @@ export default function AddGradeRow({ onAdd }) {
     const added = await addGrade(newGrade);
     if (added) {
       onAdd({ ...newGrade, id: added.id });
+
+      // ✅ עדכון ממוצע בקורס
+      await updateCourseByName(courseName, Number(finalAverage));
+
       setFormData({ courseName: '', examGrade: '', assignmentGrade: '' });
     }
   };
@@ -45,17 +59,23 @@ export default function AddGradeRow({ onAdd }) {
   return (
     <TableRow>
       <TableCell sx={{ minWidth: 180 }}>
-        <ValidatedTextField
+        <Select
           name="courseName"
-          label="Course Name"
           value={formData.courseName}
           onChange={handleChange}
-          required
-          validationType="text"
-          minLength={2}
-          fullWidth
           size="small"
-        />
+          displayEmpty
+          fullWidth
+        >
+          <MenuItem value="" disabled>
+            Select Course
+          </MenuItem>
+          {courseOptions.map((name) => (
+            <MenuItem key={name} value={name}>
+              {name}
+            </MenuItem>
+          ))}
+        </Select>
       </TableCell>
       <TableCell sx={{ minWidth: 120 }}>
         <ValidatedTextField
@@ -68,8 +88,8 @@ export default function AddGradeRow({ onAdd }) {
           validationType="number"
           min={0}
           max={100}
-          fullWidth
           size="small"
+          fullWidth
         />
       </TableCell>
       <TableCell sx={{ minWidth: 150 }}>
@@ -83,13 +103,11 @@ export default function AddGradeRow({ onAdd }) {
           validationType="number"
           min={0}
           max={100}
-          fullWidth
           size="small"
+          fullWidth
         />
       </TableCell>
-      <TableCell sx={{ minWidth: 130 }}>
-        {finalAverage || '-'}
-      </TableCell>
+      <TableCell sx={{ minWidth: 130 }}>{finalAverage}</TableCell>
       <TableCell sx={{ minWidth: 100 }}>
         <Tooltip title="Save Grade">
           <IconButton onClick={handleSave} color="primary">

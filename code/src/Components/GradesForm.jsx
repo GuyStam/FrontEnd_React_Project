@@ -1,14 +1,8 @@
 import React, { useEffect, useState } from 'react';
-import {
-  Box,
-  Button,
-  Stack,
-  Typography,
-  Paper,
-  CircularProgress,
-} from '@mui/material';
+import { Box, Button, Stack, Typography, Paper } from '@mui/material';
 import { useNavigate, useParams } from 'react-router-dom';
 import { getGrade, updateGrade } from '../assets/firebase/Grades';
+import { updateCourseByName } from '../assets/firebase/Courses';
 import ValidatedTextField from './ValidatedTextField';
 
 export default function GradesForm() {
@@ -27,9 +21,9 @@ export default function GradesForm() {
       if (data) {
         setGrade(data);
         setFormData({
-          examGrade: data.examGrade?.toString() ?? '',
-          assignmentGrade: data.assignmentGrade?.toString() ?? '',
-          finalAverage: data.finalAverage?.toString() ?? '',
+          examGrade: data.examGrade ?? '',
+          assignmentGrade: data.assignmentGrade ?? '',
+          finalAverage: data.finalAverage ?? '',
         });
       }
     };
@@ -51,13 +45,31 @@ export default function GradesForm() {
   };
 
   const handleSave = async () => {
+    const exam = Number(formData.examGrade);
+    const assignment = Number(formData.assignmentGrade);
+
+    // ✅ ולידציה לוגית לפני שמירה
+    if (
+      isNaN(exam) || isNaN(assignment) ||
+      exam < 0 || exam > 100 ||
+      assignment < 0 || assignment > 100
+    ) {
+      alert('Grades must be between 0 and 100');
+      return;
+    }
+
     const updated = {
       ...grade,
-      examGrade: Number(formData.examGrade),
-      assignmentGrade: Number(formData.assignmentGrade),
+      examGrade: exam,
+      assignmentGrade: assignment,
       finalAverage: Number(formData.finalAverage),
     };
+
     await updateGrade(gradeId, updated);
+
+    // עדכון הממוצע במסמך הקורס
+    await updateCourseByName(grade.courseName, updated.finalAverage);
+
     navigate('/management/grades');
   };
 
@@ -110,8 +122,8 @@ export default function GradesForm() {
             label="Final Average"
             name="finalAverage"
             value={formData.finalAverage}
-            disabled
             fullWidth
+            disabled
           />
         </Stack>
 

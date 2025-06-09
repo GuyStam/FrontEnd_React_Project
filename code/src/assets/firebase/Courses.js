@@ -6,16 +6,14 @@ import {
   updateDoc,
   deleteDoc,
   doc,
-  setDoc,
   query,
   where,
 } from 'firebase/firestore';
 import { firestore } from './config';
-import { addGrade, deleteGrade, listGrades } from './Grades'; // הוספת listGrades כאן
+import { addGrade, deleteGrade, listGrades } from './Grades';
 
 const COL = 'Courses';
 
-// פונקציה שמחזירה ציון רנדומלי בין 60 ל-100
 function getRandomGrade(min = 60, max = 100) {
   return Math.floor(Math.random() * (max - min + 1)) + min;
 }
@@ -46,7 +44,7 @@ export async function addCourse(course) {
     nextClass: course.nextClass ?? new Date().toISOString(),
     nextAssignment: course.nextAssignment ?? new Date().toISOString(),
     grades: {
-      finalAverage: 0, // ייקבע לפי הקולקציה Grades
+      finalAverage: 0,
     },
   });
 
@@ -69,7 +67,7 @@ export async function addCourse(course) {
 
 export async function listCourses() {
   const snapshot = await getDocs(collection(firestore, COL));
-  const grades = await listGrades(); // משיכה של כל הציונים
+  const grades = await listGrades();
 
   return snapshot.docs.map((doc) => {
     const course = { id: doc.id, ...doc.data() };
@@ -112,4 +110,16 @@ export async function deleteCourse(courseId) {
   }
 
   return deleteDoc(courseRef);
+}
+
+
+export async function updateCourseByName(courseName, finalAverage) {
+  const q = query(collection(firestore, COL), where('courseName', '==', courseName));
+  const snapshot = await getDocs(q);
+
+  snapshot.forEach((docSnap) => {
+    updateDoc(doc(firestore, COL, docSnap.id), {
+      grades: { finalAverage },
+    });
+  });
 }
