@@ -50,9 +50,12 @@ export default function GradesForm() {
 
     // ✅ ולידציה לוגית לפני שמירה
     if (
-      isNaN(exam) || isNaN(assignment) ||
-      exam < 0 || exam > 100 ||
-      assignment < 0 || assignment > 100
+      isNaN(exam) ||
+      isNaN(assignment) ||
+      exam < 0 ||
+      exam > 100 ||
+      assignment < 0 ||
+      assignment > 100
     ) {
       alert('Grades must be between 0 and 100');
       return;

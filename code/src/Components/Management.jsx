@@ -1,12 +1,6 @@
 import React, { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-import {
-  Box,
-  Button,
-  Typography,
-  TextField,
-  Snackbar
-} from '@mui/material';
+import { Box, Button, Typography, TextField, Snackbar } from '@mui/material';
 import { getLecturerMessage, setLecturerMessage } from '../assets/firebase/settings';
 
 export default function Management() {

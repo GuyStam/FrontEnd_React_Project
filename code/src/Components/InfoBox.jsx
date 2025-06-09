@@ -1,8 +1,17 @@
 import React, { useState, useEffect } from 'react';
 import {
-  Card, CardContent, Typography, Box, Button, Dialog,
-  DialogTitle, DialogContent, DialogActions, Stack,
-  Avatar, CircularProgress
+  Card,
+  CardContent,
+  Typography,
+  Box,
+  Button,
+  Dialog,
+  DialogTitle,
+  DialogContent,
+  DialogActions,
+  Stack,
+  Avatar,
+  CircularProgress,
 } from '@mui/material';
 import AssignmentIcon from '@mui/icons-material/Assignment';
 import { getStudentInfo, setStudentInfo } from '../assets/firebase/student';
@@ -10,7 +19,12 @@ import ValidatedTextField from './ValidatedTextField';
 
 export default function InfoBox() {
   const [info, setInfo] = useState({
-    fullName: '', email: '', phone: '', address: '', idNumber: '', profilePicture: '',
+    fullName: '',
+    email: '',
+    phone: '',
+    address: '',
+    idNumber: '',
+    profilePicture: '',
   });
   const [open, setOpen] = useState(false);
   const [loading, setLoading] = useState(true);
@@ -48,7 +62,11 @@ export default function InfoBox() {
   };
 
   if (loading) {
-    return <Box sx={{ display: 'flex', justifyContent: 'center', mt: 4 }}><CircularProgress /></Box>;
+    return (
+      <Box sx={{ display: 'flex', justifyContent: 'center', mt: 4 }}>
+        <CircularProgress />
+      </Box>
+    );
   }
 
   return (
@@ -75,11 +93,21 @@ export default function InfoBox() {
         </Button>
 
         <Stack spacing={1} sx={{ fontFamily: 'Assistant', color: '#555' }}>
-          <Typography><b>Name:</b> {info.fullName || '-'}</Typography>
-          <Typography><b>Email:</b> {info.email || '-'}</Typography>
-          <Typography><b>Address:</b> {info.address || '-'}</Typography>
-          <Typography><b>Phone:</b> {info.phone || '-'}</Typography>
-          <Typography><b>ID Number:</b> {info.idNumber || '-'}</Typography>
+          <Typography>
+            <b>Name:</b> {info.fullName || '-'}
+          </Typography>
+          <Typography>
+            <b>Email:</b> {info.email || '-'}
+          </Typography>
+          <Typography>
+            <b>Address:</b> {info.address || '-'}
+          </Typography>
+          <Typography>
+            <b>Phone:</b> {info.phone || '-'}
+          </Typography>
+          <Typography>
+            <b>ID Number:</b> {info.idNumber || '-'}
+          </Typography>
         </Stack>
 
         <Dialog open={open} onClose={() => setOpen(false)}>

@@ -131,11 +131,7 @@ export default function CoursesManagement() {
         {saving ? 'Saving...' : 'Save Changes'}
       </Button>
 
-      <Snackbar
-        open={snackbarOpen}
-        autoHideDuration={3000}
-        onClose={() => setSnackbarOpen(false)}
-      >
+      <Snackbar open={snackbarOpen} autoHideDuration={3000} onClose={() => setSnackbarOpen(false)}>
         <Alert severity="success" sx={{ width: '100%' }}>
           Course updated successfully!
         </Alert>

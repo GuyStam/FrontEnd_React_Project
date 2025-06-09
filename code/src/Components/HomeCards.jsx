@@ -7,15 +7,17 @@ import TimerIcon from '@mui/icons-material/Timer';
 import MessageIcon from '@mui/icons-material/Message';
 
 const formatDate = (isoString) => {
-  if (!isoString) return "N/A";
+  if (!isoString) return 'N/A';
   const date = new Date(isoString);
-  return date.toLocaleString("en-GB", {
-    day: "2-digit",
-    month: "2-digit",
-    year: "numeric",
-    hour: "2-digit",
-    minute: "2-digit"
-  }).replace(",", ""); // הסרת פסיק מיותר
+  return date
+    .toLocaleString('en-GB', {
+      day: '2-digit',
+      month: '2-digit',
+      year: 'numeric',
+      hour: '2-digit',
+      minute: '2-digit',
+    })
+    .replace(',', ''); // הסרת פסיק מיותר
 };
 
 const HomeCards = ({ nextAssignment, averageGPA, sinceStart, untilEnd, lecturerMessage }) => {
