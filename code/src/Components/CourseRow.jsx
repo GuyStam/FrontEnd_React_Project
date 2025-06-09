@@ -11,31 +11,40 @@ export default function CourseRow({ course, onClick, onDelete }) {
   return (
     <TableRow>
       <TableCell
-        onClick={() => !isManagement && onClick(course)}
         sx={{
           color: !isManagement ? '#7FC243' : 'inherit',
           fontWeight: 'bold',
           cursor: !isManagement ? 'pointer' : 'default',
+          minWidth: 140,
         }}
+        onClick={() => !isManagement && onClick(course)}
       >
         {course.courseName}
       </TableCell>
-      <TableCell>{course.lecturer}</TableCell>
-      <TableCell>{course.year}</TableCell>
-      <TableCell>{course.semester}</TableCell>
+      <TableCell sx={{ minWidth: 140 }}>{course.lecturer}</TableCell>
+      <TableCell sx={{ minWidth: 140 }}>{course.year}</TableCell>
+      <TableCell sx={{ minWidth: 140 }}>{course.semester}</TableCell>
       {isManagement && (
-        <TableCell>
-          <Button
-            variant="outlined"
-            onClick={() => navigate(`/management/courses/${course.id}`)}
-            sx={{ mr: 1 }}
-          >
-            Edit
-          </Button>
-          <IconButton onClick={() => onDelete(course)} color="error">
-            <DeleteIcon />
-          </IconButton>
-        </TableCell>
+        <>
+          <TableCell sx={{ minWidth: 180 }}>
+            {course.nextClass ? new Date(course.nextClass).toLocaleString('en-GB') : ''}
+          </TableCell>
+          <TableCell sx={{ minWidth: 180 }}>
+            {course.nextAssignment ? new Date(course.nextAssignment).toLocaleString('en-GB') : ''}
+          </TableCell>
+          <TableCell sx={{ minWidth: 100 }}>
+            <Button
+              variant="outlined"
+              onClick={() => navigate(`/management/courses/${course.id}`)}
+              sx={{ mr: 1 }}
+            >
+              Edit
+            </Button>
+            <IconButton onClick={() => onDelete(course)} color="error">
+              <DeleteIcon />
+            </IconButton>
+          </TableCell>
+        </>
       )}
     </TableRow>
   );

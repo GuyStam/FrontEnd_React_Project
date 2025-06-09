@@ -1,95 +1,52 @@
 import React, { useState, useEffect } from 'react';
 import {
   Box,
+  Typography,
   TextField,
   Button,
-  Typography,
+  Snackbar,
+  Alert,
   CircularProgress,
-  MenuItem,
 } from '@mui/material';
 import { useParams, useNavigate } from 'react-router-dom';
 import { getCourse, updateCourse } from '../assets/firebase/Courses';
 import ValidatedTextField from './ValidatedTextField';
-import { LocalizationProvider, DateTimePicker } from '@mui/x-date-pickers';
-import { AdapterDateFns } from '@mui/x-date-pickers/AdapterDateFns';
-
-const semesters = ['A', 'B', 'Summer'];
+import dayjs from 'dayjs';
+import { DateTimePicker } from '@mui/x-date-pickers';
 
 export default function CoursesManagement() {
   const { courseId } = useParams();
   const navigate = useNavigate();
-
+  const [course, setCourse] = useState(null);
   const [loading, setLoading] = useState(true);
-  const [values, setValues] = useState({
-    courseName: '',
-    lecturer: '',
-    year: '',
-    semester: '',
-    nextClass: '',
-    nextAssignment: '',
-    grades: { finalAverage: '' },
-  });
+  const [saving, setSaving] = useState(false);
+  const [snackbarOpen, setSnackbarOpen] = useState(false);
 
   useEffect(() => {
-    let mounted = true;
-    if (courseId) {
-      getCourse(courseId)
-        .then((data) => {
-          if (data && mounted) {
-            setValues({
-              courseName: data.courseName ?? '',
-              lecturer: data.lecturer ?? '',
-              year: data.year ?? '',
-              semester: data.semester ?? '',
-              nextClass: data.nextClass ?? '',
-              nextAssignment: data.nextAssignment ?? '',
-              grades: {
-                finalAverage: data.grades?.finalAverage ?? '',
-              },
-            });
-          }
-        })
-        .catch(console.error)
-        .finally(() => mounted && setLoading(false));
-    }
-    return () => {
-      mounted = false;
-    };
+    getCourse(courseId)
+      .then((data) => setCourse(data))
+      .catch(console.error)
+      .finally(() => setLoading(false));
   }, [courseId]);
 
-  const handleChange = (e) => {
-    const { name, value } = e.target;
-    if (name === 'finalAverage') {
-      setValues((prev) => ({
-        ...prev,
-        grades: { ...prev.grades, finalAverage: value },
-      }));
-    } else {
-      setValues((prev) => ({ ...prev, [name]: value }));
-    }
-  };
-
-  const handleDateChange = (name, newValue) => {
-    setValues((prev) => ({
-      ...prev,
-      [name]: newValue ? new Date(newValue).toISOString() : '',
-    }));
+  const handleChange = (field, value) => {
+    setCourse((prev) => ({ ...prev, [field]: value }));
   };
 
   const handleSubmit = async (e) => {
     e.preventDefault();
-    setLoading(true);
+    setSaving(true);
     try {
-      await updateCourse(courseId, values);
-      navigate('/management/courses');
-    } catch (error) {
-      console.error(error);
+      await updateCourse(course.id, course);
+      setSnackbarOpen(true);
+    } catch (err) {
+      console.error(err);
     } finally {
-      setLoading(false);
+      setSaving(false);
     }
   };
 
-  if (loading) {
+  if (loading || !course) {
     return (
       <Box sx={{ display: 'flex', justifyContent: 'center', mt: 4 }}>
         <CircularProgress />
@@ -98,106 +55,91 @@ export default function CoursesManagement() {
   }
 
   return (
-    <LocalizationProvider dateAdapter={AdapterDateFns}>
-      <Box
-        component="form"
-        onSubmit={handleSubmit}
-        sx={{ maxWidth: 600, mx: 'auto', mt: 4 }}
+    <Box
+      component="form"
+      onSubmit={handleSubmit}
+      sx={{
+        maxWidth: 700,
+        mx: 'auto',
+        mt: 4,
+        px: 2,
+        py: 3,
+        backgroundColor: '#fdfdfd',
+        borderRadius: 2,
+        boxShadow: 2,
+      }}
+    >
+      <Typography
+        variant="h4"
+        align="center"
+        sx={{ fontFamily: 'Assistant', fontWeight: 'bold', mb: 3 }}
       >
-        <Typography
-          variant="h4"
-          align="center"
-          gutterBottom
-          sx={{ fontFamily: 'Assistant', fontWeight: 'bold' }}
-        >
-          Edit Course
-        </Typography>
+        Edit Course
+      </Typography>
 
-        <ValidatedTextField
-          fullWidth
-          margin="normal"
-          label="Course Name"
-          name="courseName"
-          value={values.courseName}
-          onChange={handleChange}
-          required
-          validationType="text"
-          minLength={2}
-        />
-        <ValidatedTextField
-          fullWidth
-          margin="normal"
-          label="Lecturer"
-          name="lecturer"
-          value={values.lecturer}
-          onChange={handleChange}
-          required
-          validationType="text"
-          minLength={3}
-        />
-        <ValidatedTextField
-          fullWidth
-          margin="normal"
-          label="Year"
-          name="year"
-          type="number"
-          value={values.year}
-          onChange={handleChange}
-          required
-          validationType="number"
-          min={2000}
-          max={2100}
-        />
-        <ValidatedTextField
-          fullWidth
-          margin="normal"
-          select
-          label="Semester"
-          name="semester"
-          value={values.semester}
-          onChange={handleChange}
-          required
-        >
-          {semesters.map((option) => (
-            <MenuItem key={option} value={option}>
-              {option}
-            </MenuItem>
-          ))}
-        </ValidatedTextField>
+      <ValidatedTextField
+        label="Course Name"
+        value={course.courseName}
+        onChange={(e) => handleChange('courseName', e.target.value)}
+        required
+      />
 
-        <DateTimePicker
-          label="Next Class"
-          value={values.nextClass ? new Date(values.nextClass) : null}
-          onChange={(newValue) => handleDateChange('nextClass', newValue)}
-          renderInput={(params) => (
-            <TextField fullWidth margin="normal" {...params} />
-          )}
-        />
+      <ValidatedTextField
+        label="Lecturer"
+        value={course.lecturer}
+        onChange={(e) => handleChange('lecturer', e.target.value)}
+        required
+      />
 
-        <DateTimePicker
-          label="Next Assignment"
-          value={values.nextAssignment ? new Date(values.nextAssignment) : null}
-          onChange={(newValue) => handleDateChange('nextAssignment', newValue)}
-          renderInput={(params) => (
-            <TextField fullWidth margin="normal" {...params} />
-          )}
-        />
+      <ValidatedTextField
+        label="Year"
+        type="number"
+        value={course.year}
+        onChange={(e) => handleChange('year', e.target.value)}
+        required
+      />
 
-        <ValidatedTextField
-          fullWidth
-          margin="normal"
-          label="Final Average"
-          name="finalAverage"
-          value={values.grades.finalAverage}
-          onChange={handleChange}
-          validationType="number"
-          disabled
-        />
+      <ValidatedTextField
+        label="Semester"
+        value={course.semester}
+        onChange={(e) => handleChange('semester', e.target.value)}
+        required
+      />
 
-        <Button type="submit" variant="contained" color="primary" sx={{ mt: 3 }}>
-          Save
-        </Button>
-      </Box>
-    </LocalizationProvider>
+      <DateTimePicker
+        label="Next Class"
+        value={dayjs(course.nextClass)}
+        onChange={(value) => handleChange('nextClass', value.toISOString())}
+        sx={{ my: 2, width: '100%' }}
+      />
+
+      <DateTimePicker
+        label="Next Assignment"
+        value={dayjs(course.nextAssignment)}
+        onChange={(value) => handleChange('nextAssignment', value.toISOString())}
+        sx={{ mb: 2, width: '100%' }}
+      />
+
+      <Button
+        type="submit"
+        variant="contained"
+        color="success"
+        disabled={saving}
+        fullWidth
+        sx={{ mt: 1, fontWeight: 'bold' }}
+      >
+        {saving ? 'Saving...' : 'Save Changes'}
+      </Button>
+
+      <Snackbar
+        open={snackbarOpen}
+        autoHideDuration={3000}
+        onClose={() => setSnackbarOpen(false)}
+      >
+        <Alert severity="success" sx={{ width: '100%' }}>
+          Course updated successfully!
+        </Alert>
+      </Snackbar>
+    </Box>
   );
 }

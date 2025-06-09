@@ -22,7 +22,7 @@ import {
   listCourses,
   addCourse,
   deleteCourse,
-  seedAllCoursesIfEmpty, // ✅ נוספה שורה זו
+  seedAllCoursesIfEmpty,
 } from '../assets/firebase/Courses';
 import AddCourseRow from './AddCourseRow';
 import CourseRow from './CourseRow';
@@ -59,7 +59,6 @@ function CoursesTable() {
         const data = await listCourses();
 
         if (data.length === 0) {
-          console.log('⛔ No courses found – seeding...');
           await seedAllCoursesIfEmpty();
           const seeded = await listCourses();
           if (mounted) setCourses(seeded);
@@ -152,7 +151,7 @@ function CoursesTable() {
   };
 
   return (
-    <Box sx={{ width: '100%', mt: 4, px: 2 }}>
+    <Box sx={{ maxWidth: '100%', mx: 'auto', mt: 4, px: 2 }}>
       <Typography
         variant="h4"
         align="center"
@@ -177,45 +176,39 @@ function CoursesTable() {
         </Box>
       ) : (
         <TableContainer component={Paper}>
-          <Table sx={{ tableLayout: 'fixed', minWidth: 1300 }}>
-            <TableHead>
-              <TableRow sx={{ backgroundColor: '#eee' }}>
-                {['courseName', 'lecturer', 'year', 'semester'].map((col) => (
-                  <TableCell key={col} sx={{ minWidth: 140 }}>
-                    <TableSortLabel
-                      active={orderBy === col}
-                      direction={orderBy === col ? orderDirection : 'asc'}
-                      onClick={() => handleSort(col)}
-                    >
-                      {col.charAt(0).toUpperCase() + col.slice(1)}
-                    </TableSortLabel>
-                  </TableCell>
-                ))}
-                {isManagement && (
-                  <>
-                    <TableCell sx={{ minWidth: 160 }}>Next Class</TableCell>
-                    <TableCell sx={{ minWidth: 160 }}>Next Assignment</TableCell>
-                    <TableCell sx={{ minWidth: 100 }}>Actions</TableCell>
-                  </>
-                )}
-              </TableRow>
-            </TableHead>
-            <TableBody>
-              {isManagement && (
-                <AddCourseRow
-                  newCourse={newCourse}
-                  setNewCourse={setNewCourse}
-                  onSave={handleSaveNewCourse}
-                />
-              )}
-              {filterUniqueByName(sorted).length === 0 ? (
-                <TableRow>
-                  <TableCell colSpan={10} align="center" sx={{ color: '#999', fontStyle: 'italic' }}>
-                    No courses found.
-                  </TableCell>
+          <Box sx={{ overflowX: 'auto' }}>
+            <Table sx={{ tableLayout: 'fixed', minWidth: 1000 }}>
+              <TableHead>
+                <TableRow sx={{ backgroundColor: '#eee' }}>
+                  {['courseName', 'lecturer', 'year', 'semester'].map((col) => (
+                    <TableCell key={col} sx={{ minWidth: 120 }}>
+                      <TableSortLabel
+                        active={orderBy === col}
+                        direction={orderBy === col ? orderDirection : 'asc'}
+                        onClick={() => handleSort(col)}
+                      >
+                        {col.charAt(0).toUpperCase() + col.slice(1)}
+                      </TableSortLabel>
+                    </TableCell>
+                  ))}
+                  {isManagement && (
+                    <>
+                      <TableCell sx={{ minWidth: 160 }}>Next Class</TableCell>
+                      <TableCell sx={{ minWidth: 160 }}>Next Assignment</TableCell>
+                      <TableCell sx={{ minWidth: 100 }}>Actions</TableCell>
+                    </>
+                  )}
                 </TableRow>
-              ) : (
-                filterUniqueByName(sorted).map((c) => (
+              </TableHead>
+              <TableBody>
+                {isManagement && (
+                  <AddCourseRow
+                    newCourse={newCourse}
+                    setNewCourse={setNewCourse}
+                    onSave={handleSaveNewCourse}
+                  />
+                )}
+                {filterUniqueByName(sorted).map((c) => (
                   <CourseRow
                     key={c.id}
                     course={c}
@@ -224,10 +217,10 @@ function CoursesTable() {
                     onDelete={handleOpenDeleteDialog}
                     onEdit={() => navigate(`/management/courses/${c.id}`)}
                   />
-                ))
-              )}
-            </TableBody>
-          </Table>
+                ))}
+              </TableBody>
+            </Table>
+          </Box>
         </TableContainer>
       )}
 

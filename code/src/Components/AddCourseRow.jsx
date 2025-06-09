@@ -23,7 +23,7 @@ export default function AddCourseRow({ newCourse, setNewCourse, onSave }) {
   return (
     <LocalizationProvider dateAdapter={AdapterDateFns}>
       <TableRow>
-        <TableCell>
+        <TableCell sx={{ minWidth: 140 }}>
           <ValidatedTextField
             name="courseName"
             label="Course Name"
@@ -36,7 +36,7 @@ export default function AddCourseRow({ newCourse, setNewCourse, onSave }) {
             size="small"
           />
         </TableCell>
-        <TableCell>
+        <TableCell sx={{ minWidth: 140 }}>
           <ValidatedTextField
             name="lecturer"
             label="Lecturer"
@@ -49,7 +49,7 @@ export default function AddCourseRow({ newCourse, setNewCourse, onSave }) {
             size="small"
           />
         </TableCell>
-        <TableCell>
+        <TableCell sx={{ minWidth: 140 }}>
           <ValidatedTextField
             name="year"
             label="Year"
@@ -64,7 +64,7 @@ export default function AddCourseRow({ newCourse, setNewCourse, onSave }) {
             size="small"
           />
         </TableCell>
-        <TableCell>
+        <TableCell sx={{ minWidth: 140 }}>
           <ValidatedTextField
             select
             name="semester"
@@ -82,23 +82,23 @@ export default function AddCourseRow({ newCourse, setNewCourse, onSave }) {
             ))}
           </ValidatedTextField>
         </TableCell>
-        <TableCell>
+        <TableCell sx={{ minWidth: 180 }}>
           <DateTimePicker
             label="Next Class"
             value={newCourse.nextClass ? new Date(newCourse.nextClass) : null}
             onChange={(newValue) => handleDateChange('nextClass', newValue)}
-            renderInput={(params) => <TextField {...params} size="small" fullWidth />}
+            slotProps={{ textField: { size: 'small', fullWidth: true } }}
           />
         </TableCell>
-        <TableCell>
+        <TableCell sx={{ minWidth: 180 }}>
           <DateTimePicker
             label="Next Assignment"
             value={newCourse.nextAssignment ? new Date(newCourse.nextAssignment) : null}
             onChange={(newValue) => handleDateChange('nextAssignment', newValue)}
-            renderInput={(params) => <TextField {...params} size="small" fullWidth />}
+            slotProps={{ textField: { size: 'small', fullWidth: true } }}
           />
         </TableCell>
-        <TableCell>
+        <TableCell sx={{ minWidth: 100 }}>
           <IconButton onClick={onSave} color="primary">
             <SaveIcon />
           </IconButton>

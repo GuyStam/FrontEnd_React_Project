@@ -26,6 +26,16 @@ export default function CoursesForm() {
       .finally(() => setLoading(false));
   }, [courseId]);
 
+  const fmt = (date) =>
+    new Date(date).toLocaleString('en-GB', {
+      hour12: false,
+      day: '2-digit',
+      month: '2-digit',
+      year: 'numeric',
+      hour: '2-digit',
+      minute: '2-digit',
+    });
+
   if (loading) {
     return (
       <Box sx={{ display: 'flex', justifyContent: 'center', mt: 4 }}>
@@ -42,10 +52,8 @@ export default function CoursesForm() {
     );
   }
 
-  const fmt = (date) => new Date(date).toLocaleString('en-GB', { hour12: false });
-
   return (
-    <Box sx={{ maxWidth: 960, mx: 'auto', mt: 4, px: 2 }}>
+    <Box sx={{ maxWidth: 1000, mx: 'auto', mt: 4, px: 2 }}>
       <Typography
         variant="h4"
         align="center"
@@ -56,7 +64,7 @@ export default function CoursesForm() {
       </Typography>
 
       <TableContainer component={Paper}>
-        <Table>
+        <Table sx={{ tableLayout: 'fixed' }}>
           <TableHead>
             <TableRow sx={{ backgroundColor: '#f0f0f0' }}>
               {[

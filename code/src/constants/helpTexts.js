@@ -1,27 +1,32 @@
 export const helpTexts = {
   title: 'Help & User Guide',
   welcome:
-    'Welcome to the help page! Here you will find guidance on how to use the system. You can also contact us through the form below if you need assistance.',
+    'Need help using the system? Here’s a quick guide to get you started. You can also contact us using the form below.',
   sections: [
     {
       title: '🏠 Home Page',
       content:
-        'The Home Page is your dashboard. It displays an overview of your assignments, GPA, upcoming exams, and more. Stay on top of your studies!',
+        'Your dashboard. Shows GPA, upcoming tasks, and your next 10 classes — sorted automatically.',
     },
     {
       title: '📋 Forms',
       content:
-        'The Forms section allows you to view and submit any required forms for your courses. You can track deadlines and upload your assignments here.',
+        'Submit grades and assignments manually when needed. You can also edit course info here.',
     },
     {
       title: '🛠️ Management',
       content:
-        "The Management area is for administrators to manage courses, assignments, and other data. It's where you can add or modify course details.",
+        'Admins can manage all courses and grades. Data is validated and updates instantly across the system.',
     },
     {
-      title: '📝 Info',
+      title: '🧠 Auto Setup',
       content:
-        'The Info section contains your personal details. You can update your contact information such as your name, email, and phone number here.',
+        'No data? No problem. The system adds 10 sample courses with realistic dates — Tuesdays/Thursdays, 16:00–21:45.',
+    },
+    {
+      title: '🗓️ Weekly Timetable',
+      content:
+        'Shows up to 10 upcoming classes. Automatically sorted by time and updated with every change.',
     },
     {
       title: '📩 Need Help? Send us a message',
@@ -31,8 +36,8 @@ export const helpTexts = {
   labels: {
     message: 'Your message',
     send: 'Send',
-    alert: 'Gmail compose opened. Ready to send to Admin.',
-    confirmTitle: 'Are you sure you want to send this message?',
+    alert: 'Gmail opened — ready to send!',
+    confirmTitle: 'Send this message?',
     confirmCancel: 'Cancel',
     confirmSend: 'Send Now',
   },
