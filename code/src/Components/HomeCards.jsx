@@ -17,166 +17,79 @@ const formatDate = (isoString) => {
       hour: '2-digit',
       minute: '2-digit',
     })
-    .replace(',', ''); // הסרת פסיק מיותר
+    .replace(',', '');
 };
 
 const HomeCards = ({ nextAssignment, averageGPA, sinceStart, untilEnd, lecturerMessage }) => {
+  const topRow = [
+    {
+      title: 'Upcoming Assignments',
+      icon: <AssignmentIcon sx={{ fontSize: 40, color: 'white' }} />,
+      content: nextAssignment ? `Next due: ${formatDate(nextAssignment)}` : 'None',
+    },
+    {
+      title: 'Upcoming Exams',
+      icon: <CalendarTodayIcon sx={{ fontSize: 40, color: 'white' }} />,
+      content: nextAssignment ? `Exam on: ${formatDate(nextAssignment)}` : 'None',
+    },
+    {
+      title: 'Current GPA',
+      icon: <SchoolIcon sx={{ fontSize: 40, color: 'white' }} />,
+      content: averageGPA || 'N/A',
+    },
+  ];
+
+  const bottomRow = [
+    {
+      title: 'Days Since Start',
+      icon: <TimerIcon sx={{ fontSize: 40, color: 'white' }} />,
+      content: `${sinceStart} days since start`,
+    },
+    {
+      title: 'Lecturer Message',
+      icon: <MessageIcon sx={{ fontSize: 40, color: 'white' }} />,
+      content: lecturerMessage || 'No message',
+    },
+    {
+      title: 'Days Until End',
+      icon: <TimerIcon sx={{ fontSize: 40, color: 'white' }} />,
+      content: untilEnd,
+    },
+  ];
+
+  const renderCards = (cards) =>
+    cards.map((card, index) => (
+      <Grid item xs={12} md={4} key={index}>
+        <Paper
+          sx={{
+            padding: 3,
+            display: 'flex',
+            flexDirection: 'column',
+            alignItems: 'center',
+            borderRadius: 2,
+            boxShadow: 3,
+            backgroundColor: '#7FC243',
+          }}
+        >
+          {card.icon}
+          <Typography
+            variant="h6"
+            sx={{ fontFamily: 'Assistant', fontWeight: 'bold', mb: 1, color: 'white' }}
+          >
+            {card.title}
+          </Typography>
+          <Typography sx={{ textAlign: 'center', color: 'white' }}>{card.content}</Typography>
+        </Paper>
+      </Grid>
+    ));
+
   return (
     <Box sx={{ padding: 3 }}>
-      <Grid container spacing={3} sx={{ mb: 4 }}>
-        {/* Upcoming Assignments Card */}
-        <Grid item xs={12} md={4}>
-          <Paper
-            sx={{
-              padding: 3,
-              display: 'flex',
-              flexDirection: 'column',
-              alignItems: 'center',
-              borderRadius: 2,
-              boxShadow: 3,
-              backgroundColor: '#7FC243',
-            }}
-          >
-            <AssignmentIcon sx={{ fontSize: 40, color: 'white' }} />
-            <Typography
-              variant="h6"
-              sx={{ fontFamily: 'Assistant', fontWeight: 'bold', mb: 1, color: 'white' }}
-            >
-              Upcoming Assignments
-            </Typography>
-            <Typography sx={{ textAlign: 'center', color: 'white' }}>
-              {nextAssignment ? `Next due: ${formatDate(nextAssignment)}` : 'None'}
-            </Typography>
-          </Paper>
-        </Grid>
-
-        {/* Current GPA Card */}
-        <Grid item xs={12} md={4}>
-          <Paper
-            sx={{
-              padding: 3,
-              display: 'flex',
-              flexDirection: 'column',
-              alignItems: 'center',
-              borderRadius: 2,
-              boxShadow: 3,
-              backgroundColor: '#7FC243',
-            }}
-          >
-            <SchoolIcon sx={{ fontSize: 40, color: 'white' }} />
-            <Typography
-              variant="h6"
-              sx={{ fontFamily: 'Assistant', fontWeight: 'bold', mb: 1, color: 'white' }}
-            >
-              Current GPA
-            </Typography>
-            <Typography sx={{ textAlign: 'center', color: 'white' }}>
-              {averageGPA || 'N/A'}
-            </Typography>
-          </Paper>
-        </Grid>
-
-        {/* Upcoming Exams Card */}
-        <Grid item xs={12} md={4}>
-          <Paper
-            sx={{
-              padding: 3,
-              display: 'flex',
-              flexDirection: 'column',
-              alignItems: 'center',
-              borderRadius: 2,
-              boxShadow: 3,
-              backgroundColor: '#7FC243',
-            }}
-          >
-            <CalendarTodayIcon sx={{ fontSize: 40, color: 'white' }} />
-            <Typography
-              variant="h6"
-              sx={{ fontFamily: 'Assistant', fontWeight: 'bold', mb: 1, color: 'white' }}
-            >
-              Upcoming Exams
-            </Typography>
-            <Typography sx={{ textAlign: 'center', color: 'white' }}>
-              {nextAssignment ? `Exam on: ${formatDate(nextAssignment)}` : 'None'}
-            </Typography>
-          </Paper>
-        </Grid>
-
-        {/* Days Since Start Card */}
-        <Grid item xs={12} md={4}>
-          <Paper
-            sx={{
-              padding: 3,
-              display: 'flex',
-              flexDirection: 'column',
-              alignItems: 'center',
-              borderRadius: 2,
-              boxShadow: 3,
-              backgroundColor: '#7FC243',
-            }}
-          >
-            <TimerIcon sx={{ fontSize: 40, color: 'white' }} />
-            <Typography
-              variant="h6"
-              sx={{ fontFamily: 'Assistant', fontWeight: 'bold', mb: 1, color: 'white' }}
-            >
-              Days Since Start
-            </Typography>
-            <Typography sx={{ textAlign: 'center', color: 'white' }}>
-              {`${sinceStart} days since start`}
-            </Typography>
-          </Paper>
-        </Grid>
-
-        {/* Days Until End Card */}
-        <Grid item xs={12} md={4}>
-          <Paper
-            sx={{
-              padding: 3,
-              display: 'flex',
-              flexDirection: 'column',
-              alignItems: 'center',
-              borderRadius: 2,
-              boxShadow: 3,
-              backgroundColor: '#7FC243',
-            }}
-          >
-            <TimerIcon sx={{ fontSize: 40, color: 'white' }} />
-            <Typography
-              variant="h6"
-              sx={{ fontFamily: 'Assistant', fontWeight: 'bold', mb: 1, color: 'white' }}
-            >
-              Days Until End
-            </Typography>
-            <Typography sx={{ textAlign: 'center', color: 'white' }}>{untilEnd}</Typography>
-          </Paper>
-        </Grid>
-
-        {/* Lecturer Message Card */}
-        <Grid item xs={12} md={4}>
-          <Paper
-            sx={{
-              padding: 3,
-              display: 'flex',
-              flexDirection: 'column',
-              alignItems: 'center',
-              borderRadius: 2,
-              boxShadow: 3,
-              backgroundColor: '#7FC243',
-            }}
-          >
-            <MessageIcon sx={{ fontSize: 40, color: 'white' }} />
-            <Typography
-              variant="h6"
-              sx={{ fontFamily: 'Assistant', fontWeight: 'bold', mb: 1, color: 'white' }}
-            >
-              Lecturer Message
-            </Typography>
-            <Typography sx={{ textAlign: 'center', color: 'white' }}>
-              {lecturerMessage || 'No message'}
-            </Typography>
-          </Paper>
-        </Grid>
+      <Grid container spacing={3} justifyContent="center" sx={{ mb: 3 }}>
+        {renderCards(topRow)}
+      </Grid>
+      <Grid container spacing={3} justifyContent="center">
+        {renderCards(bottomRow)}
       </Grid>
     </Box>
   );
