@@ -8,6 +8,18 @@ export default function CourseRow({ course, onClick, onDelete }) {
   const location = useLocation();
   const isManagement = location.pathname.startsWith('/management');
 
+  const formatDateTime = (iso) => {
+    if (!iso) return '';
+    const options = {
+      day: '2-digit',
+      month: '2-digit',
+      year: 'numeric',
+      hour: '2-digit',
+      minute: '2-digit',
+    };
+    return new Date(iso).toLocaleString('en-GB', options);
+  };
+
   return (
     <TableRow>
       <TableCell
@@ -24,13 +36,14 @@ export default function CourseRow({ course, onClick, onDelete }) {
       <TableCell sx={{ minWidth: 140 }}>{course.lecturer}</TableCell>
       <TableCell sx={{ minWidth: 140 }}>{course.year}</TableCell>
       <TableCell sx={{ minWidth: 140 }}>{course.semester}</TableCell>
+
       {isManagement && (
         <>
           <TableCell sx={{ minWidth: 180 }}>
-            {course.nextClass ? new Date(course.nextClass).toLocaleString('en-GB') : ''}
+            {formatDateTime(course.nextClass)}
           </TableCell>
           <TableCell sx={{ minWidth: 180 }}>
-            {course.nextAssignment ? new Date(course.nextAssignment).toLocaleString('en-GB') : ''}
+            {formatDateTime(course.nextAssignment)}
           </TableCell>
           <TableCell sx={{ minWidth: 100 }}>
             <Button

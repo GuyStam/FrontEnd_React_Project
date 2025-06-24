@@ -60,7 +60,7 @@ export default function GradesTable() {
   });
 
   const filtered = sorted.filter((g) =>
-    Object.values(g).join(' ').toLowerCase().includes(searchTerm.toLowerCase()),
+    Object.values(g).join(' ').toLowerCase().includes(searchTerm.toLowerCase())
   );
 
   return (
@@ -86,9 +86,12 @@ export default function GradesTable() {
       <TableContainer component={Paper}>
         <Table>
           <TableHead>
-            <TableRow sx={{ backgroundColor: '#f0f0f0' }}>
+            <TableRow sx={{ backgroundColor: '#f5f5f5' }}>
               {['courseName', 'examGrade', 'assignmentGrade', 'finalAverage'].map((key) => (
-                <TableCell key={key} sx={{ fontFamily: 'Assistant', fontWeight: 'bold' }}>
+                <TableCell
+                  key={key}
+                  sx={{ fontFamily: 'Assistant', fontWeight: 'bold', minWidth: 140 }}
+                >
                   <TableSortLabel
                     active={sortColumn === key}
                     direction={sortColumn === key ? sortDirection : 'asc'}
@@ -101,14 +104,22 @@ export default function GradesTable() {
             </TableRow>
           </TableHead>
           <TableBody>
-            {filtered.map((grade) => (
-              <TableRow key={grade.id}>
-                <TableCell>{grade.courseName}</TableCell>
-                <TableCell>{grade.examGrade}</TableCell>
-                <TableCell>{grade.assignmentGrade}</TableCell>
-                <TableCell>{grade.finalAverage}</TableCell>
+            {filtered.length === 0 ? (
+              <TableRow>
+                <TableCell colSpan={4} align="center" sx={{ fontFamily: 'Assistant' }}>
+                  No grades found.
+                </TableCell>
               </TableRow>
-            ))}
+            ) : (
+              filtered.map((grade) => (
+                <TableRow key={grade.id}>
+                  <TableCell>{grade.courseName}</TableCell>
+                  <TableCell>{grade.examGrade}</TableCell>
+                  <TableCell>{grade.assignmentGrade}</TableCell>
+                  <TableCell>{grade.finalAverage}</TableCell>
+                </TableRow>
+              ))
+            )}
           </TableBody>
         </Table>
       </TableContainer>

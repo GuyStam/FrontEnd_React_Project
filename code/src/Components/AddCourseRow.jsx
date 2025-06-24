@@ -1,5 +1,5 @@
 import React from 'react';
-import { TableCell, TableRow, IconButton, MenuItem, TextField } from '@mui/material';
+import { TableCell, TableRow, IconButton, MenuItem } from '@mui/material';
 import SaveIcon from '@mui/icons-material/Save';
 import ValidatedTextField from './ValidatedTextField';
 import { LocalizationProvider, DateTimePicker } from '@mui/x-date-pickers';
@@ -18,6 +18,27 @@ export default function AddCourseRow({ newCourse, setNewCourse, onSave }) {
       ...prev,
       [name]: newValue ? new Date(newValue).toISOString() : '',
     }));
+  };
+
+  const validateBeforeSave = () => {
+    const year = Number(newCourse.year);
+    const onlyEnglishRegex = /^[A-Za-z .'-]+$/;
+
+    if (
+      !newCourse.courseName?.trim() ||
+      !newCourse.lecturer?.trim() ||
+      !newCourse.semester ||
+      isNaN(year) ||
+      year < 2000 ||
+      year > 2100 ||
+      !onlyEnglishRegex.test(newCourse.courseName) ||
+      !onlyEnglishRegex.test(newCourse.lecturer)
+    ) {
+      onSave(null, '❌ Please fill all fields correctly using English only.');
+      return;
+    }
+
+    onSave(newCourse);
   };
 
   return (
@@ -99,7 +120,7 @@ export default function AddCourseRow({ newCourse, setNewCourse, onSave }) {
           />
         </TableCell>
         <TableCell sx={{ minWidth: 100 }}>
-          <IconButton onClick={onSave} color="primary">
+          <IconButton onClick={validateBeforeSave} color="primary">
             <SaveIcon />
           </IconButton>
         </TableCell>

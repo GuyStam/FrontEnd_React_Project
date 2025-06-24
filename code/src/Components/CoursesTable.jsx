@@ -16,6 +16,8 @@ import {
   DialogTitle,
   DialogActions,
   Button,
+  Snackbar,
+  Alert,
 } from '@mui/material';
 import { useNavigate, useLocation } from 'react-router-dom';
 import {
@@ -47,6 +49,7 @@ function CoursesTable() {
   const [selectedCourse, setSelectedCourse] = useState(null);
   const [openDeleteDialog, setOpenDeleteDialog] = useState(false);
   const [courseToDelete, setCourseToDelete] = useState(null);
+  const [snackbar, setSnackbar] = useState({ open: false, message: '', severity: 'success' });
 
   const navigate = useNavigate();
   const location = useLocation();
@@ -93,12 +96,27 @@ function CoursesTable() {
     setOpen(false);
   };
 
-  const handleSaveNewCourse = async () => {
-    if (!newCourse.courseName || !newCourse.lecturer) return;
-    const newId = await addCourse(newCourse);
-    if (newId) {
-      setCourses((prev) => [...prev, { id: newId, ...newCourse }]);
+  const handleSaveNewCourse = async (course, errorMessage) => {
+    if (!course) {
+      setSnackbar({
+        open: true,
+        message: errorMessage || '❌ Invalid course details.',
+        severity: 'error',
+      });
+      return;
     }
+
+    const newId = await addCourse(course);
+    if (!newId) {
+      setSnackbar({
+        open: true,
+        message: `❌ A course named '${course.courseName}' already exists.`,
+        severity: 'error',
+      });
+      return;
+    }
+
+    setCourses((prev) => [...prev, { id: newId, ...course }]);
     setNewCourse({
       courseName: '',
       lecturer: '',
@@ -106,6 +124,12 @@ function CoursesTable() {
       semester: '',
       nextClass: '',
       nextAssignment: '',
+    });
+
+    setSnackbar({
+      open: true,
+      message: `✅ Course '${course.courseName}' added successfully!`,
+      severity: 'success',
     });
   };
 
@@ -124,6 +148,11 @@ function CoursesTable() {
       await deleteCourse(courseToDelete.id);
       setCourses((prev) => prev.filter((c) => c.id !== courseToDelete.id));
       setOpenDeleteDialog(false);
+      setSnackbar({
+        open: true,
+        message: `✅ Course '${courseToDelete.courseName}' deleted successfully.`,
+        severity: 'success',
+      });
       setCourseToDelete(null);
     }
   };
@@ -208,16 +237,25 @@ function CoursesTable() {
                     onSave={handleSaveNewCourse}
                   />
                 )}
-                {filterUniqueByName(sorted).map((c) => (
-                  <CourseRow
-                    key={c.id}
-                    course={c}
-                    isManagement={isManagement}
-                    onClick={handleOpenDialog}
-                    onDelete={handleOpenDeleteDialog}
-                    onEdit={() => navigate(`/management/courses/${c.id}`)}
-                  />
-                ))}
+
+                {filterUniqueByName(sorted).length === 0 ? (
+                  <TableRow>
+                    <TableCell colSpan={isManagement ? 7 : 4} align="center">
+                      No courses found.
+                    </TableCell>
+                  </TableRow>
+                ) : (
+                  filterUniqueByName(sorted).map((c) => (
+                    <CourseRow
+                      key={c.id}
+                      course={c}
+                      isManagement={isManagement}
+                      onClick={handleOpenDialog}
+                      onDelete={handleOpenDeleteDialog}
+                      onEdit={() => navigate(`/management/courses/${c.id}`)}
+                    />
+                  ))
+                )}
               </TableBody>
             </Table>
           </Box>
@@ -237,6 +275,17 @@ function CoursesTable() {
           </Button>
         </DialogActions>
       </Dialog>
+
+      <Snackbar
+        open={snackbar.open}
+        autoHideDuration={3000}
+        onClose={() => setSnackbar({ ...snackbar, open: false })}
+        anchorOrigin={{ vertical: 'top', horizontal: 'center' }}
+      >
+        <Alert severity={snackbar.severity} sx={{ width: '100%' }}>
+          {snackbar.message}
+        </Alert>
+      </Snackbar>
     </Box>
   );
 }

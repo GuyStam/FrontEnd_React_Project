@@ -1,5 +1,13 @@
 import React, { useEffect, useState } from 'react';
-import { Box, Button, Stack, Typography, Paper } from '@mui/material';
+import {
+  Box,
+  Button,
+  Stack,
+  Typography,
+  Paper,
+  Snackbar,
+  Alert,
+} from '@mui/material';
 import { useNavigate, useParams } from 'react-router-dom';
 import { getGrade, updateGrade } from '../assets/firebase/Grades';
 import { updateCourseByName } from '../assets/firebase/Courses';
@@ -14,6 +22,8 @@ export default function GradesForm() {
     assignmentGrade: '',
     finalAverage: '',
   });
+
+  const [snackbar, setSnackbar] = useState({ open: false, message: '', severity: 'success' });
 
   useEffect(() => {
     const loadGrade = async () => {
@@ -48,7 +58,6 @@ export default function GradesForm() {
     const exam = Number(formData.examGrade);
     const assignment = Number(formData.assignmentGrade);
 
-    // ✅ ולידציה לוגית לפני שמירה
     if (
       isNaN(exam) ||
       isNaN(assignment) ||
@@ -57,7 +66,11 @@ export default function GradesForm() {
       assignment < 0 ||
       assignment > 100
     ) {
-      alert('Grades must be between 0 and 100');
+      setSnackbar({
+        open: true,
+        message: '❌ Grades must be between 0 and 100',
+        severity: 'error',
+      });
       return;
     }
 
@@ -69,11 +82,15 @@ export default function GradesForm() {
     };
 
     await updateGrade(gradeId, updated);
-
-    // עדכון הממוצע במסמך הקורס
     await updateCourseByName(grade.courseName, updated.finalAverage);
 
-    navigate('/management/grades');
+    setSnackbar({
+      open: true,
+      message: `✅ Grade for '${grade.courseName}' updated successfully!`,
+      severity: 'success',
+    });
+
+    setTimeout(() => navigate('/management/grades'), 1500);
   };
 
   if (!grade) {
@@ -147,6 +164,17 @@ export default function GradesForm() {
           </Button>
         </Stack>
       </Paper>
+
+      <Snackbar
+        anchorOrigin={{ vertical: 'top', horizontal: 'center' }}
+        open={snackbar.open}
+        autoHideDuration={3000}
+        onClose={() => setSnackbar({ ...snackbar, open: false })}
+      >
+        <Alert severity={snackbar.severity} sx={{ width: '100%' }}>
+          {snackbar.message}
+        </Alert>
+      </Snackbar>
     </Box>
   );
 }

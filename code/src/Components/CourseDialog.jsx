@@ -9,7 +9,13 @@ export default function CourseDialog({ open, onClose, course }) {
   const formatDate = (dateStr) => {
     if (!dateStr) return 'N/A';
     const date = new Date(dateStr);
-    return date.toLocaleString('en-GB');
+    return date.toLocaleString('en-GB', {
+      day: '2-digit',
+      month: '2-digit',
+      year: 'numeric',
+      hour: '2-digit',
+      minute: '2-digit',
+    });
   };
 
   return (
@@ -35,10 +41,12 @@ export default function CourseDialog({ open, onClose, course }) {
           fontSize: '1.5rem',
           pb: 1,
           textAlign: 'center',
+          color: '#7FC243',
         }}
       >
         Course Details
       </DialogTitle>
+
       <DialogContent
         sx={{
           fontFamily: 'Assistant',
