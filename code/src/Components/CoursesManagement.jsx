@@ -1,12 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import {
-  Box,
-  Typography,
-  Button,
-  Snackbar,
-  Alert,
-  CircularProgress,
-} from '@mui/material';
+import { Box, Typography, Button, Snackbar, Alert, CircularProgress } from '@mui/material';
 import { useParams, useNavigate } from 'react-router-dom';
 import { getCourse, updateCourse } from '../assets/firebase/Courses';
 import ValidatedTextField from './ValidatedTextField';

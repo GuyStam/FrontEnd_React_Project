@@ -60,7 +60,7 @@ export default function GradesTable() {
   });
 
   const filtered = sorted.filter((g) =>
-    Object.values(g).join(' ').toLowerCase().includes(searchTerm.toLowerCase())
+    Object.values(g).join(' ').toLowerCase().includes(searchTerm.toLowerCase()),
   );
 
   return (

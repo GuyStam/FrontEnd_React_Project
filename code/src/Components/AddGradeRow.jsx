@@ -59,7 +59,7 @@ export default function AddGradeRow({ onAdd }) {
 
     const existingGrades = await listGrades();
     const isDuplicate = existingGrades.some(
-      (g) => g.courseName.trim().toLowerCase() === courseName.trim().toLowerCase()
+      (g) => g.courseName.trim().toLowerCase() === courseName.trim().toLowerCase(),
     );
 
     if (isDuplicate) {

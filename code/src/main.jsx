@@ -14,5 +14,5 @@ createRoot(document.getElementById('root')).render(
         <App />
       </LocalizationProvider>
     </BrowserRouter>
-  </React.StrictMode>
+  </React.StrictMode>,
 );

@@ -1,13 +1,5 @@
 import React, { useEffect, useState } from 'react';
-import {
-  Box,
-  Button,
-  Stack,
-  Typography,
-  Paper,
-  Snackbar,
-  Alert,
-} from '@mui/material';
+import { Box, Button, Stack, Typography, Paper, Snackbar, Alert } from '@mui/material';
 import { useNavigate, useParams } from 'react-router-dom';
 import { getGrade, updateGrade } from '../assets/firebase/Grades';
 import { updateCourseByName } from '../assets/firebase/Courses';

@@ -39,12 +39,8 @@ export default function CourseRow({ course, onClick, onDelete }) {
 
       {isManagement && (
         <>
-          <TableCell sx={{ minWidth: 180 }}>
-            {formatDateTime(course.nextClass)}
-          </TableCell>
-          <TableCell sx={{ minWidth: 180 }}>
-            {formatDateTime(course.nextAssignment)}
-          </TableCell>
+          <TableCell sx={{ minWidth: 180 }}>{formatDateTime(course.nextClass)}</TableCell>
+          <TableCell sx={{ minWidth: 180 }}>{formatDateTime(course.nextAssignment)}</TableCell>
           <TableCell sx={{ minWidth: 100 }}>
             <Button
               variant="outlined"
