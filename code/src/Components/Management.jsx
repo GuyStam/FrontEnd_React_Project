@@ -2,6 +2,7 @@ import React, { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { Box, Button, Typography, TextField, Snackbar } from '@mui/material';
 import { getLecturerMessage, setLecturerMessage } from '../assets/firebase/settings';
+import AdminResetButton from './AdminResetButton'; // ✅ חדש
 
 export default function Management() {
   const navigate = useNavigate();
@@ -79,6 +80,9 @@ export default function Management() {
           Save Lecturer Message
         </Button>
       </Box>
+
+      {/* ✅ כפתור איפוס הנתונים */}
+      <AdminResetButton />
 
       <Snackbar
         open={success}

@@ -1,3 +1,4 @@
+// assets/firebase/Courses.js
 import {
   addDoc,
   collection,
@@ -18,13 +19,11 @@ function getRandomGrade(min = 60, max = 100) {
   return Math.floor(Math.random() * (max - min + 1)) + min;
 }
 
-// ✅ מחזיר תאריך בשנה הקרובה בימי שלישי או חמישי, בשעה בין 16:00 ל־21:45 בקפיצות של 15 דקות
 function getRandomDate() {
   const now = new Date();
   const end = new Date();
   end.setFullYear(end.getFullYear() + 1);
-
-  const days = [2, 4]; // 0=Sunday ... 6=Saturday → 2=Tuesday, 4=Thursday
+  const days = [2, 4]; // Tuesday & Thursday
 
   while (true) {
     const randomTime = now.getTime() + Math.random() * (end.getTime() - now.getTime());
@@ -32,7 +31,7 @@ function getRandomDate() {
     const day = date.getDay();
 
     if (days.includes(day)) {
-      const hour = 16 + Math.floor(Math.random() * 6); // 16–21
+      const hour = 16 + Math.floor(Math.random() * 6);
       const quarter = [0, 15, 30, 45];
       const minute = quarter[Math.floor(Math.random() * quarter.length)];
       date.setHours(hour, minute, 0, 0);
@@ -55,10 +54,16 @@ const seedCourses = [
 ];
 
 export async function addCourse(course) {
-  const q = query(collection(firestore, COL), where('courseName', '==', course.courseName));
+  const q = query(
+    collection(firestore, COL),
+    where('courseName', '==', course.courseName),
+    where('year', '==', Number(course.year)),
+    where('semester', '==', course.semester)
+  );
   const existing = await getDocs(q);
   if (!existing.empty) return null;
 
+  // יוצרים קורס עם ממוצע זמני
   const docRef = await addDoc(collection(firestore, COL), {
     courseName: course.courseName,
     lecturer: course.lecturer,
@@ -75,6 +80,7 @@ export async function addCourse(course) {
   const assignment = getRandomGrade();
   const finalAvg = ((exam + assignment) / 2).toFixed(1);
 
+  // מוסיפים ציון אמיתי בטבלת Grades
   await addGrade({
     courseName: course.courseName,
     lecturer: course.lecturer,
@@ -83,6 +89,13 @@ export async function addCourse(course) {
     examGrade: exam,
     assignmentGrade: assignment,
     finalAverage: Number(finalAvg),
+  });
+
+  // ✅ מעדכנים גם בקורס את הממוצע
+  await updateDoc(doc(firestore, COL, docRef.id), {
+    grades: {
+      finalAverage: Number(finalAvg),
+    },
   });
 
   return docRef.id;
@@ -95,7 +108,6 @@ export async function listCourses() {
   return snapshot.docs.map((doc) => {
     const course = { id: doc.id, ...doc.data() };
     const grade = grades.find((g) => g.courseName === course.courseName);
-
     return {
       ...course,
       grades: {
@@ -123,10 +135,8 @@ export async function deleteCourse(courseId) {
   if (courseSnap.exists()) {
     const courseData = courseSnap.data();
     const courseName = courseData.courseName;
-
     const q = query(collection(firestore, 'Grades'), where('courseName', '==', courseName));
     const gradeSnap = await getDocs(q);
-
     for (let doc of gradeSnap.docs) {
       await deleteGrade(doc.id);
     }
@@ -138,7 +148,6 @@ export async function deleteCourse(courseId) {
 export async function updateCourseByName(courseName, finalAverage) {
   const q = query(collection(firestore, COL), where('courseName', '==', courseName));
   const snapshot = await getDocs(q);
-
   snapshot.forEach((docSnap) => {
     updateDoc(doc(firestore, COL, docSnap.id), {
       grades: { finalAverage },

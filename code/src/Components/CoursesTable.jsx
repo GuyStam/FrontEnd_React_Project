@@ -1,3 +1,4 @@
+// Components/CoursesTable.jsx
 import React, { useState, useEffect } from 'react';
 import {
   Box,
@@ -24,13 +25,12 @@ import {
   listCourses,
   addCourse,
   deleteCourse,
-  seedAllCoursesIfEmpty,
 } from '../assets/firebase/Courses';
 import AddCourseRow from './AddCourseRow';
 import CourseRow from './CourseRow';
 import CourseDialog from './CourseDialog';
 
-function CoursesTable() {
+export default function CoursesTable() {
   const [courses, setCourses] = useState([]);
   const [loading, setLoading] = useState(true);
   const [searchTerm, setSearchTerm] = useState('');
@@ -60,14 +60,7 @@ function CoursesTable() {
     const load = async () => {
       try {
         const data = await listCourses();
-
-        if (data.length === 0) {
-          await seedAllCoursesIfEmpty();
-          const seeded = await listCourses();
-          if (mounted) setCourses(seeded);
-        } else {
-          if (mounted) setCourses(data);
-        }
+        if (mounted) setCourses(data);
       } catch (err) {
         console.error('Failed to load courses:', err);
       } finally {
@@ -289,5 +282,3 @@ function CoursesTable() {
     </Box>
   );
 }
-
-export default CoursesTable;
